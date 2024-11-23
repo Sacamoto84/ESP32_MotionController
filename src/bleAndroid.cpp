@@ -6,6 +6,7 @@
 #include <BLE2902.h>
 #include <BLEClient.h>
 #include <SimpleCLI.h>
+#include "tmcGlobal.h"
 
 extern SimpleCLI cli;
 extern void cliInit(void);
@@ -44,6 +45,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
   void onWrite(BLECharacteristic *pCharacteristic)
   {
     std::string value = pCharacteristic->getValue();
+
     if (value.length() > 0)
     {
       Serial2.print("BLE прием:");
@@ -97,12 +99,16 @@ void BLE_tick()
 {
   if (deviceConnected)
   { // Проверяем, есть ли подключенный клиент
-    String data = "Time: " + String(millis() / 1000) + "s";
-    pCharacteristic->setValue(data.c_str()); // Устанавливаем новое значение
-    pCharacteristic->notify();               // Отправляем уведомление
-    Serial.println("Data sent: " + data);    // Лог для отладки
-    Serial2.println("Data sent: " + data);   // Лог для отладки
-    delay(5000);                             // Задержка
+    // String data = "Time: " + String(millis() / 1000) + "s";
+
+    report0();
+    // pCharacteristic->setValue(data.c_str()); // Устанавливаем новое значение
+    pCharacteristic->setValue(buf20, 4); // Устанавливаем новое значение
+    pCharacteristic->notify();           // Отправляем уведомление
+
+    // Serial2.println("Data sent: ");    // Лог для отладки
+    // Serial2.println("Data sent: " + data);   // Лог для отладки
+    delay(500); // Задержка
   }
   delay(100);
 }
