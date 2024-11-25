@@ -10,11 +10,21 @@
 #include <BLE2902.h>
 #include <BLEClient.h>
 
-extern void lcdInit();
+#include "global.h"
 
-#define BTN 19
-#define ENC0 21
-#define ENC1 22
+#include <EncButton.h>
+extern EncButton eb;
+
+int var1 = 0;
+int var2 = 0;
+int var3 = 0;
+
+
+
+extern void lcdInit();
+extern void encoderInit();
+
+
 #define DIAG0 35
 #define DIAG1 34
 
@@ -41,21 +51,27 @@ extern void BLE_tick();
 
 bool shaft = false;
 
-
+// // esp8266/esp32
+IRAM_ATTR void isr() {
+  eb.tickISR();
+}
 
 void setup()
 {
 
+  observer();
+  
   lcdInit();
+
+  encoderInit();
+  //eb.setEncISR(true);
 
   pinMode(CS_PIN, INPUT);
   pinMode(SW_MOSI, INPUT);
   pinMode(SW_MISO, INPUT);
   pinMode(SW_SCK, INPUT);
 
-  pinMode(BTN, INPUT);
-  pinMode(ENC0, INPUT);
-  pinMode(ENC1, INPUT);
+
   pinMode(DIAG0, INPUT);
   pinMode(DIAG1, INPUT);
 
@@ -101,18 +117,57 @@ void setup()
   
 }
 
+
+uint8_t select1;  // выбранная переменная
+
 void loop()
 {
+
+  //  eb.tick();
+  //  // выбор переменной для изменения
+  //   if (eb.hasClicks()) {
+  //       select1 = eb.getClicks();
+  //       Serial2.println(String("Select: ") + select1);
+  //   }
+
+  //   if (eb.turn()) {
+  //       // меняем переменную
+  //       switch (select1) {
+  //           case 1:
+  //               // изменение с шагом 5
+  //               var1 += 5 * eb.dir();
+  //               break;
+  //           case 2:
+  //               // изменение с шагом 1, при зажатой кнопке шаг 5
+  //               var2 += (eb.pressing() ? 5 : 1) * eb.dir();
+  //               break;
+  //           case 3:
+  //               // изменение с шагом 1, при быстром вращении шаг 5
+  //               var3 += (eb.fast() ? 5 : 1) * eb.dir();
+  //               break;
+  //       }
+  //       Serial2.println(String("vars ") + var1 + ',' + var2 + ',' + var3);
+  //   }
+
+
+
+
+
+
+
+
+
+
 
   // Run 5000 steps and switch direction in software
   // while (true) {
 
-  digitalWrite(STEP_PIN, HIGH);
-  // lay(1);
-  delayMicroseconds(2000);
-  digitalWrite(STEP_PIN, LOW);
-  // delay(1);
-  delayMicroseconds(2000);
+  // digitalWrite(STEP_PIN, HIGH);
+  // // lay(1);
+  // delayMicroseconds(2000);
+  // digitalWrite(STEP_PIN, LOW);
+  // // delay(1);
+  // delayMicroseconds(2000);
 
   //}
   // shaft = !shaft;

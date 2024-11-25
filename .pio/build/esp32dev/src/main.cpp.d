@@ -271,4 +271,29 @@
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEServer.h \
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUtils.h \
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLE2902.h \
- C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEClient.h
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEClient.h \
+ src/global.h src/state.h .pio/libdeps/esp32dev/EncButton/src/EncButton.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/Button.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/VirtButton.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/flags.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/io.h \
+ .pio/libdeps/esp32dev/GyverIO/src/GyverIO.h \
+ .pio/libdeps/esp32dev/GyverIO/src/gio/gio.h \
+ .pio/libdeps/esp32dev/GyverIO/src/gio/gio_esp32.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/driver/include/driver/rtc_io.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/include/soc/rtc_io_periph.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/esp32/include/soc/rtc_io_channel.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/esp32/include/soc/rtc_io_struct.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/esp32/include/soc/rtc_cntl_struct.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/soc/esp32/include/soc/sens_struct.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/rtc_io_types.h \
+ .pio/libdeps/esp32dev/GyverIO/src/gio/gio_defs.h \
+ .pio/libdeps/esp32dev/GyverIO/src/utils/PinIO.h \
+ .pio/libdeps/esp32dev/GyverIO/src/utils/PinT.h \
+ .pio/libdeps/esp32dev/GyverIO/src/utils/shift.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/self.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/EncButton.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/VirtEncButton.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/VirtEncoder.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/Encoder.h \
+ .pio/libdeps/esp32dev/EncButton/src/core/MultiButton.h

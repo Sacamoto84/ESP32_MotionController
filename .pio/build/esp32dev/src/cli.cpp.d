@@ -141,4 +141,5 @@
  .pio/libdeps/esp32dev/SimpleCLI/src/c/arg_types.h \
  .pio/libdeps/esp32dev/SimpleCLI/src/c/cmd_error_types.h \
  .pio/libdeps/esp32dev/SimpleCLI/src/c/cmd_types.h \
- .pio/libdeps/esp32dev/SimpleCLI/src/c/parser_types.h src/tmcGlobal.h
+ .pio/libdeps/esp32dev/SimpleCLI/src/c/parser_types.h src/tmcGlobal.h \
+ src/global.h src/state.h

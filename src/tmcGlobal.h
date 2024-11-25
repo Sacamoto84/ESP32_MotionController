@@ -5,9 +5,6 @@
 
 extern uint8_t buf20[];
 
-extern uint8_t tmcDriverEnable;
-extern uint8_t tmcDriverChop;
-
 extern uint8_t updateLCD;
 
 

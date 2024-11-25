@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SimpleCLI.h>
 #include "tmcGlobal.h"
+#include "global.h"
 
 extern void update();
 
@@ -8,7 +9,7 @@ SimpleCLI cli;
 
 // Список команд
 Command cmdReset;  // Перезагрузка reset
-Command cmdEnable; // Включение отключение драйвера enable [on/off]
+Command cmdEnable; // Включение отключение драйвера >>enable [on/off]
 
 void resetCallback(cmd *c)
 {   
@@ -23,30 +24,17 @@ void enableCallback(cmd *c)
     Argument arg = cmd.getArgument(0);
     String argVal = arg.getValue();
     if(argVal == "on"){
-        tmcDriverEnable = 1;
+        tmcDriverEnable.set(1);
         Serial2.println("Включить мотор");
         update();
     }
     else
     {
-       tmcDriverEnable = 0; 
+       tmcDriverEnable.set(0); 
        Serial2.println("Выключить мотор");
        update();
     }
 }
-
-
-// if (value == "motor_on")
-// {
-//     Serial2.println("motor_on");
-//     tmcDriverEnable = 1;
-// }
-
-// if (value == "motor_off")
-// {
-//     Serial2.println("motor_off");
-//     tmcDriverEnable = 0;
-// }
 
 void errorCallback(cmd_error *errorPtr)
 {
@@ -61,6 +49,11 @@ void errorCallback(cmd_error *errorPtr)
         Serial2.println(cli.toString());
     }
 }
+
+
+
+
+
 
 
 void pingCallback(cmd *cmdPtr)

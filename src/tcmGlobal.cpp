@@ -1,9 +1,9 @@
 #include "tmcGlobal.h"
+#include "global.h"
 
 uint8_t buf20[20] = {0};
 
-uint8_t tmcDriverEnable = 0;
-uint8_t tmcDriverChop = 0;
+
 
 /*
 Формирование репорти типа 0
@@ -21,7 +21,7 @@ void report0(){
     memset(buf20, 0, sizeof(buf20));
 
     buf20[0] = 'R';
-    buf20[2] = tmcDriverEnable | (tmcDriverChop<<1);
+    buf20[2] = tmcDriverEnable.get() | (tmcDriverChop.get()<<1);
     
 
 }
