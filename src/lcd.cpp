@@ -31,7 +31,6 @@
 SemaphoreHandle_t semaphore; // Дескриптор семафора
 
 extern EncButton eb;
-
 // #define TFT_MISO 19
 // #define TFT_MOSI 23
 // #define TFT_SCLK 18
@@ -68,23 +67,23 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 // uint16 color = ((red>>3)<<11) | ((green>>2)<<5) | (blue>>3);
 
 TaskHandle_t TaskLcd;
-void TaskLcdLoop(void *parameter);
+
+[[noreturn]] void TaskLcdLoop(void *parameter);
+
 void screen0();
 
-void lcdInit()
-{
+void lcdInit() {
     xTaskCreatePinnedToCore(
-        TaskLcdLoop,   /* Функция для задачи */
-        "TaskLcdLoop", /* Имя задачи */
-        10000,         /* Размер стека */
-        NULL,          /* Параметр задачи */
-        8,             /* Приоритет */
-        &TaskLcd,      /* Выполняемая операция */
-        0);            /* Номер ядра, на котором она должна выполняться */
+            TaskLcdLoop,    /* Функция для задачи */
+            "TaskLcdLoop",     /* Имя задачи */
+            10000,         /* Размер стека */
+            NULL,          /* Параметр задачи */
+            8,                /* Приоритет */
+            &TaskLcd,     /* Выполняемая операция */
+            0);                /* Номер ядра, на котором она должна выполняться */
 }
 
-void TaskLcdLoop(void *parameter)
-{
+[[noreturn]] void TaskLcdLoop(void *parameter) {
     vSemaphoreCreateBinary(semaphore);
 
     tft.init();
@@ -95,8 +94,7 @@ void TaskLcdLoop(void *parameter)
 
     tft.loadFont(AA_FONT_SMALL); // Must load the font first
 
-    while (true)
-    {
+    while (true) {
         // xSemaphoreTake(semaphore, portMAX_DELAY);
         screen0();
 
@@ -106,22 +104,19 @@ void TaskLcdLoop(void *parameter)
 
 bool updateLcd = true;
 
-void update()
-{
+void update() {
     updateLcd = true;
     // xSemaphoreGive(semaphore);
 }
 
-void Text(String text, int x = 0, int y = 0, uint16_t colorText = 0, uint16_t colorBg = 0xFFFF, bool bgfill = false)
-{
+void Text(String text, int x = 0, int y = 0, uint16_t colorText = 0, uint16_t colorBg = 0xFFFF, bool bgfill = false) {
     tft.setTextColor(colorText, colorBg, bgfill);
     tft.setCursor(x, y);
     // tft.drawString(text, x, y);
     tft.println(text);
 }
 
-enum Screen0Lines
-{
+enum Screen0Lines {
     enable = 0,
     chop = 1,
     current = 2,
@@ -135,15 +130,15 @@ enum Screen0Lines
 
 // Определение типа функции для обработки value
 typedef void (*ValueProcessor)(State<uint16_t> value);
+
 /**
  * index - индекс в списке
  * line  - текущий индекс
  * isSelect - признак того что выбрана строка, обращается к общей &isSelect
  */
-void SWITCH(int index, int line, bool *isSelect, State<uint16_t> *value, String text_on, String text_off, int x, int y, uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg)
-{
-    if ((line == index) && (eb.press()))
-    {
+void SWITCH(int index, int line, bool *isSelect, State<uint16_t> *value, String text_on, String text_off, int x, int y,
+            uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg) {
+    if ((line == index) && (eb.press())) {
         uint16_t a = value->get();
         a = !a;
         value->set(a);
@@ -157,55 +152,47 @@ void SWITCH(int index, int line, bool *isSelect, State<uint16_t> *value, String 
         Text(s0, x, y, colorInactve, colorBg);
 }
 
-void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step, String text, int x, int y, uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg, String correction = "")
-{
+void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step,
+             String text, int x, int y, uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg,
+             const String& correction = "") {
+
     auto a = *isSelect;
 
-    if (line == index)
-    {
+    if (line == index) {
 
-        if (eb.press())
-        {
+        if (eb.press()) {
             a = !a;
             *isSelect = a;
         }
 
-        if (a)
-        {
-            // Микрошаг
-            if (correction == "")
-            {
+        if (a) {
 
-                if (eb.right())
-                {
+            // Микрошаг
+            if (correction == "") {
+
+                if (eb.right()) {
                     uint16_t t = value->get() + step;
                     if (t >= max)
                         t = max;
                     value->set(t);
                 }
-                if (eb.left())
-                {
+                if (eb.left()) {
                     uint16_t t = value->get() - step;
                     if (t <= min)
                         t = min;
                     value->set(t);
                 }
-            }
-            else
-            {
+            } else {
 
-                if (correction == "microstep")
-                {
+                if (correction == "microstep") {
 
-                    if (eb.right())
-                    {
+                    if (eb.right()) {
                         uint16_t t = value->get() * 2;
                         if (t >= max)
                             t = max;
                         value->set(t);
                     }
-                    if (eb.left())
-                    {
+                    if (eb.left()) {
                         uint16_t t = value->get() / 2;
                         if (t <= min)
                             t = min;
@@ -218,19 +205,16 @@ void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16
 
     String str11 = String(text) + value->get();
 
-    if (line == index)
-    {
+    if (line == index) {
         if (!a)
             Text(str11, x, y, Yellow, colorBg);
         else
             Text(str11, x, y, colorBg, Yellow, true);
-    }
-    else
+    } else
         Text(str11, x, y, colorInactve, colorBg);
 }
 
-void screen0()
-{
+void screen0() {
 
     int ITEMS_COUNT = 9;  // Количество елементов в списке
     int ITEMS_WINDOW = 5; // Количество отображаемых елементов
@@ -253,45 +237,39 @@ void screen0()
     static int indexEndWindow = ITEMS_WINDOW - 1;
 
     // scrollbar
-    float sbPercent = (float)(ITEMS_WINDOW) / (float)ITEMS_COUNT;
-    float sbMaxHeight = 131;                               // Максимальная высота всего скролл бар
-    float sbActiveHeight = (float)sbMaxHeight * sbPercent; // Высота активной части
-    int sbW = 3;                                           // Ширина
-    uint16_t sbColor = White;                              // Цвет активной части
-    uint16_t sbColorBg = Black;                            // Цвет фона
+    float sbPercent = (float) (ITEMS_WINDOW) / (float) ITEMS_COUNT;
+    float sbMaxHeight = 131;                                // Максимальная высота всего скролл бар
+    float sbActiveHeight = (float) sbMaxHeight * sbPercent; // Высота активной части
+    int sbW = 3;                                            // Ширина
+    uint16_t sbColor = White;                               // Цвет активной части
+    uint16_t sbColorBg = Black;                             // Цвет фона
     int sbX = 239 - 5;
     int sbY = 1;
     float sbOffsetY = 0.0f;
 
-    if (eb.turn() || (updateLcd == true) || eb.press())
-    {
+    if (eb.turn() || (updateLcd == true) || eb.press()) {
         updateLcd = false;
 
-        if (eb.turn() && !isSelect)
-        {
-            if (eb.right())
-            {
+        if (eb.turn() && !isSelect) {
+            if (eb.right()) {
                 line++;
                 if (line > ITEMS_COUNT - 1)
                     line = ITEMS_COUNT - 1;
 
-                if (line > indexEndWindow)
-                {
+                if (line > indexEndWindow) {
                     indexEndWindow = line;
                     indexStartWindow = line - (ITEMS_WINDOW - 1);
-                    if(indexStartWindow < 0) indexStartWindow = 0;
+                    if (indexStartWindow < 0) indexStartWindow = 0;
                 }
 
                 Serial2.printf("S:%d E:%d L:%d\n", indexStartWindow, indexEndWindow, line);
             }
-            if (eb.left())
-            {
+            if (eb.left()) {
                 line--;
                 if (line < 0)
                     line = 0;
 
-                if (line < indexStartWindow)
-                {
+                if (line < indexStartWindow) {
                     indexStartWindow = line;
                     indexEndWindow = line + ITEMS_WINDOW - 1;
                 }
@@ -308,41 +286,49 @@ void screen0()
         // tft.drawString(">", 2, line * height);
 
         int ii = 0;
-        for (int i = indexStartWindow; i <= indexEndWindow; i++)
-        {
+        for (int i = indexStartWindow; i <= indexEndWindow; i++) {
 
             if (i == Screen0Lines::enable)
-                SWITCH(Screen0Lines::enable, line, &isSelect, &tmcDriverEnable, "Мотор: Вкл", "Мотор: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                SWITCH(Screen0Lines::enable, line, &isSelect, &tmcDriverEnable, "Мотор: Вкл", "Мотор: Выкл", startX,
+                       ii * height + startY, colorActive, colorInactve, colorBg);
 
             if (i == Screen0Lines::chop)
-                SWITCH(Screen0Lines::chop, line, &isSelect, &tmcDriverChop, "Режим: StealthChop", "Режим: SpreadCycle", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                SWITCH(Screen0Lines::chop, line, &isSelect, &tmcDriverChop, "Режим: StealthChop", "Режим: SpreadCycle",
+                       startX, ii * height + startY, colorActive, colorInactve, colorBg);
 
             if (i == Screen0Lines::current)
-                EDITINT(Screen0Lines::current, line, &isSelect, &tmcDriverCurrent, 100, 4300, 100, "Ток: ", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                EDITINT(Screen0Lines::current, line, &isSelect, &tmcDriverCurrent, 100, 4300, 100, "Ток: ", startX,
+                        ii * height + startY, colorActive, colorInactve, colorBg);
 
             if (i == Screen0Lines::microstep)
-                EDITINT(Screen0Lines::microstep, line, &isSelect, &tmcDriverMicrostep, 1, 256, 1, "Микрошаг: ", startX, ii * height + startY, colorActive, colorInactve, colorBg, "microstep");
+                EDITINT(Screen0Lines::microstep, line, &isSelect, &tmcDriverMicrostep, 1, 256, 1, "Микрошаг: ", startX,
+                        ii * height + startY, colorActive, colorInactve, colorBg, "microstep");
 
             if (i == Screen0Lines::interpolation)
-                SWITCH(Screen0Lines::interpolation, line, &isSelect, &tmcDriverInterpolation, "Interpolation: Вкл", "Interpolation: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                SWITCH(Screen0Lines::interpolation, line, &isSelect, &tmcDriverInterpolation, "Interpolation: Вкл",
+                       "Interpolation: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
 
             if (i == Screen0Lines::r1)
-                SWITCH(Screen0Lines::r1, line, &isSelect, &tmcDriverInterpolation, "r1: Вкл", "r1: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
-            
+                SWITCH(Screen0Lines::r1, line, &isSelect, &tmcDriverInterpolation, "r1: Вкл", "r1: Выкл", startX,
+                       ii * height + startY, colorActive, colorInactve, colorBg);
+
             if (i == Screen0Lines::r2)
-                SWITCH(Screen0Lines::r2, line, &isSelect, &tmcDriverInterpolation, "r2: Вкл", "r2: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                SWITCH(Screen0Lines::r2, line, &isSelect, &tmcDriverInterpolation, "r2: Вкл", "r2: Выкл", startX,
+                       ii * height + startY, colorActive, colorInactve, colorBg);
 
             if (i == Screen0Lines::r3)
-                SWITCH(Screen0Lines::r3, line, &isSelect, &tmcDriverInterpolation, "r3: Вкл", "r3: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                SWITCH(Screen0Lines::r3, line, &isSelect, &tmcDriverInterpolation, "r3: Вкл", "r3: Выкл", startX,
+                       ii * height + startY, colorActive, colorInactve, colorBg);
 
             if (i == Screen0Lines::r4)
-                SWITCH(Screen0Lines::r4, line, &isSelect, &tmcDriverInterpolation, "r4: Вкл", "r4: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+                SWITCH(Screen0Lines::r4, line, &isSelect, &tmcDriverInterpolation, "r4: Вкл", "r4: Выкл", startX,
+                       ii * height + startY, colorActive, colorInactve, colorBg);
 
             ii++;
         }
 
-        tft.fillRect(sbX, sbY, sbW, sbMaxHeight, sbColorBg);
-        int a = (float)indexStartWindow / (float)ITEMS_COUNT * sbMaxHeight;
+        tft.fillRect(sbX, sbY, sbW, (int)sbMaxHeight, sbColorBg);
+        int a = (float) indexStartWindow / (float) ITEMS_COUNT * sbMaxHeight;
         tft.fillRect(sbX + 1, sbY + a, sbW - 2, sbActiveHeight, sbColor);
     }
     delay(5);

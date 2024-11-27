@@ -61,7 +61,7 @@ void errorCallback(cmd_error *errorPtr)
     }
 }
 
-void readGCONFcallback(cmd *c)
+void readGSONCallback(cmd *c)
 {
     Command cmd(c);
     Serial2.print("Прочесть GCONF:");
@@ -102,13 +102,13 @@ void pingCallback(cmd *cmdPtr)
     }
 }
 
-void cliInit(void)
+void cliInit()
 {
 
     // Сброс
     cmdReset = cli.addCommand("reset", resetCallback);
     cmdEnable = cli.addSingleArgCmd("enable", enableCallback);
-    cmdReadGCONF = cli.addCommand("readGCONF", readGCONFcallback);
+    cmdReadGCONF = cli.addCommand("readGCONF", readGSONCallback);
 
     // cmdPing.addPositionalArgument("str", "pong");
     // cmdPing.addArgument("n/um/ber,anzahl", "1");
