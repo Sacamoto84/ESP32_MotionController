@@ -30,7 +30,10 @@ void observer()
  tmcDriverCurrent.addObserver([](uint16_t value)
                               { 
                                 Serial2.printf("Observer: tmcDriverCurrent updated %d\n", value);
-                              
+                                driver.rms_current(value); // Set motor RMS current
                                });
 
 }
+
+
+

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include "state.h"
+#include "tmcGlobal.h"
 
 extern void observer();
 

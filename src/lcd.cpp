@@ -3,7 +3,6 @@
 #include "tmcGlobal.h"
 #include <Arduino.h>
 
-
 #include <string>
 
 #include <TFT_eSPI.h> // Hardware-specific library
@@ -105,7 +104,7 @@ void TaskLcdLoop(void *parameter)
     }
 }
 
-bool updateLcd = false;
+bool updateLcd = true;
 
 void update()
 {
@@ -216,7 +215,7 @@ void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16
             }
         }
     }
- 
+
     String str11 = String(text) + value->get();
 
     if (line == index)
@@ -232,6 +231,10 @@ void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16
 
 void screen0()
 {
+
+    int ITEMS_COUNT = 9;  // Количество елементов в списке
+    int ITEMS_WINDOW = 5; // Количество отображаемых елементов
+
     eb.tick();
 
     static int line = 0; // Текущая строка
@@ -241,9 +244,24 @@ void screen0()
     uint16_t colorInactve = DarkGrey;
     uint16_t colorActive = Yellow;
 
-    int height = 25;
-    int startY = 6;
+    int height = 26;
+    int startY = 5;
     int startX = 6;
+
+    static int indexStartWindow = 0;
+    //int windowDelta = (ITEMS_WINDOW)-1;
+    static int indexEndWindow = ITEMS_WINDOW - 1;
+
+    // scrollbar
+    float sbPercent = (float)(ITEMS_WINDOW) / (float)ITEMS_COUNT;
+    float sbMaxHeight = 131;                               // Максимальная высота всего скролл бар
+    float sbActiveHeight = (float)sbMaxHeight * sbPercent; // Высота активной части
+    int sbW = 3;                                           // Ширина
+    uint16_t sbColor = White;                              // Цвет активной части
+    uint16_t sbColorBg = Black;                            // Цвет фона
+    int sbX = 239 - 5;
+    int sbY = 1;
+    float sbOffsetY = 0.0f;
 
     if (eb.turn() || (updateLcd == true) || eb.press())
     {
@@ -254,14 +272,31 @@ void screen0()
             if (eb.right())
             {
                 line++;
-                if (line > Screen0Lines::interpolation)
-                    line = Screen0Lines::interpolation;
+                if (line > ITEMS_COUNT - 1)
+                    line = ITEMS_COUNT - 1;
+
+                if (line > indexEndWindow)
+                {
+                    indexEndWindow = line;
+                    indexStartWindow = line - (ITEMS_WINDOW - 1);
+                    if(indexStartWindow < 0) indexStartWindow = 0;
+                }
+
+                Serial2.printf("S:%d E:%d L:%d\n", indexStartWindow, indexEndWindow, line);
             }
             if (eb.left())
             {
                 line--;
                 if (line < 0)
                     line = 0;
+
+                if (line < indexStartWindow)
+                {
+                    indexStartWindow = line;
+                    indexEndWindow = line + ITEMS_WINDOW - 1;
+                }
+
+                Serial2.printf("S:%d E:%d L:%d\n", indexStartWindow, indexEndWindow, line);
             }
         }
 
@@ -270,13 +305,45 @@ void screen0()
 
         tft.setTextColor(WHITE, BLACK);
         tft.setTextColor(White, colorBg);
-        //tft.drawString(">", 2, line * height);
+        // tft.drawString(">", 2, line * height);
 
-        SWITCH(Screen0Lines::enable, line, &isSelect, &tmcDriverEnable, "Мотор: Вкл", "Мотор: Выкл", startX, Screen0Lines::enable * height + startY, colorActive, colorInactve, colorBg);
-        SWITCH(Screen0Lines::chop, line, &isSelect, &tmcDriverChop, "Режим: StealthChop", "Режим: SpreadCycle", startX, Screen0Lines::chop * height + startY, colorActive, colorInactve, colorBg);
-        EDITINT(Screen0Lines::current, line, &isSelect, &tmcDriverCurrent, 100, 4300, 100, "Ток: ", startX, Screen0Lines::current * height + startY, colorActive, colorInactve, colorBg);
-        EDITINT(Screen0Lines::microstep, line, &isSelect, &tmcDriverMicrostep, 1, 256, 1, "Микрошаг: ", startX, Screen0Lines::microstep * height + startY, colorActive, colorInactve, colorBg, "microstep");
-        SWITCH(Screen0Lines::interpolation, line, &isSelect, &tmcDriverInterpolation, "Interpolation: Вкл", "Interpolation: Выкл", startX, Screen0Lines::interpolation * height + startY, colorActive, colorInactve, colorBg);
+        int ii = 0;
+        for (int i = indexStartWindow; i <= indexEndWindow; i++)
+        {
+
+            if (i == Screen0Lines::enable)
+                SWITCH(Screen0Lines::enable, line, &isSelect, &tmcDriverEnable, "Мотор: Вкл", "Мотор: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            if (i == Screen0Lines::chop)
+                SWITCH(Screen0Lines::chop, line, &isSelect, &tmcDriverChop, "Режим: StealthChop", "Режим: SpreadCycle", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            if (i == Screen0Lines::current)
+                EDITINT(Screen0Lines::current, line, &isSelect, &tmcDriverCurrent, 100, 4300, 100, "Ток: ", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            if (i == Screen0Lines::microstep)
+                EDITINT(Screen0Lines::microstep, line, &isSelect, &tmcDriverMicrostep, 1, 256, 1, "Микрошаг: ", startX, ii * height + startY, colorActive, colorInactve, colorBg, "microstep");
+
+            if (i == Screen0Lines::interpolation)
+                SWITCH(Screen0Lines::interpolation, line, &isSelect, &tmcDriverInterpolation, "Interpolation: Вкл", "Interpolation: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            if (i == Screen0Lines::r1)
+                SWITCH(Screen0Lines::r1, line, &isSelect, &tmcDriverInterpolation, "r1: Вкл", "r1: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+            
+            if (i == Screen0Lines::r2)
+                SWITCH(Screen0Lines::r2, line, &isSelect, &tmcDriverInterpolation, "r2: Вкл", "r2: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            if (i == Screen0Lines::r3)
+                SWITCH(Screen0Lines::r3, line, &isSelect, &tmcDriverInterpolation, "r3: Вкл", "r3: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            if (i == Screen0Lines::r4)
+                SWITCH(Screen0Lines::r4, line, &isSelect, &tmcDriverInterpolation, "r4: Вкл", "r4: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
+
+            ii++;
+        }
+
+        tft.fillRect(sbX, sbY, sbW, sbMaxHeight, sbColorBg);
+        int a = (float)indexStartWindow / (float)ITEMS_COUNT * sbMaxHeight;
+        tft.fillRect(sbX + 1, sbY + a, sbW - 2, sbActiveHeight, sbColor);
     }
     delay(5);
 }

@@ -104,11 +104,11 @@ void BLE_tick()
     report0();
     // pCharacteristic->setValue(data.c_str()); // Устанавливаем новое значение
     pCharacteristic->setValue(buf20, 4); // Устанавливаем новое значение
-    pCharacteristic->notify();           // Отправляем уведомление
+    //pCharacteristic->notify();           // Отправляем уведомление
 
     // Serial2.println("Data sent: ");    // Лог для отладки
     // Serial2.println("Data sent: " + data);   // Лог для отладки
-    delay(500); // Задержка
+    delay(50); // Задержка
   }
   delay(100);
 }

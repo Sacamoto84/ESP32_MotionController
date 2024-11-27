@@ -173,4 +173,17 @@
  .pio/libdeps/esp32dev/SimpleCLI/src/c/arg_types.h \
  .pio/libdeps/esp32dev/SimpleCLI/src/c/cmd_error_types.h \
  .pio/libdeps/esp32dev/SimpleCLI/src/c/cmd_types.h \
- .pio/libdeps/esp32dev/SimpleCLI/src/c/parser_types.h src/tmcGlobal.h
+ .pio/libdeps/esp32dev/SimpleCLI/src/c/parser_types.h src/tmcGlobal.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
+ C:/Users/user/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/TMCStepper.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/SERIAL_SWITCH.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC_platforms.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/SW_SPI.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC2130_bitfields.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC2160_bitfields.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC5130_bitfields.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC5160_bitfields.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC2208_bitfields.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC2209_bitfields.h \
+ .pio/libdeps/esp32dev/TMCStepper/src/source/TMC2660_bitfields.h

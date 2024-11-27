@@ -3,7 +3,7 @@
 
 uint8_t buf20[20] = {0};
 
-
+TMC2160Stepper driver(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK);
 
 /*
 Формирование репорти типа 0
