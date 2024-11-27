@@ -272,7 +272,7 @@
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEUtils.h \
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLE2902.h \
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src/BLEClient.h \
- src/global.h src/state.h src/tmcGlobal.h \
+ include/global.h include/state.h include/tmcGlobal.h \
  .pio/libdeps/esp32dev/EncButton/src/EncButton.h \
  .pio/libdeps/esp32dev/EncButton/src/core/Button.h \
  .pio/libdeps/esp32dev/EncButton/src/core/VirtButton.h \

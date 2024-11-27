@@ -173,7 +173,7 @@
  .pio/libdeps/esp32dev/SimpleCLI/src/c/arg_types.h \
  .pio/libdeps/esp32dev/SimpleCLI/src/c/cmd_error_types.h \
  .pio/libdeps/esp32dev/SimpleCLI/src/c/cmd_types.h \
- .pio/libdeps/esp32dev/SimpleCLI/src/c/parser_types.h src/tmcGlobal.h \
+ .pio/libdeps/esp32dev/SimpleCLI/src/c/parser_types.h include/tmcGlobal.h \
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
  C:/Users/user/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
  .pio/libdeps/esp32dev/TMCStepper/src/TMCStepper.h \

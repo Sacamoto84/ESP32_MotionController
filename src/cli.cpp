@@ -8,9 +8,9 @@ extern void update();
 SimpleCLI cli;
 
 // Список команд
-Command cmdReset;  // Перезагрузка reset
-Command cmdEnable; // Включение отключение драйвера >>enable [on/off]
-Command cmdReadGCONF;
+//Command cmdReset;  // Перезагрузка reset
+//Command cmdEnable; // Включение отключение драйвера >>enable [on/off]
+//Command cmdReadGCONF;
 
 void printBits(uint32_t value)
 {
@@ -106,9 +106,9 @@ void cliInit()
 {
 
     // Сброс
-    cmdReset = cli.addCommand("reset", resetCallback);
-    cmdEnable = cli.addSingleArgCmd("enable", enableCallback);
-    cmdReadGCONF = cli.addCommand("readGCONF", readGSONCallback);
+    Command cmdReset = cli.addCommand("reset", resetCallback);
+    Command cmdEnable = cli.addSingleArgCmd("enable", enableCallback);
+    Command cmdReadGCONF = cli.addCommand("readGCONF", readGSONCallback);
 
     // cmdPing.addPositionalArgument("str", "pong");
     // cmdPing.addArgument("n/um/ber,anzahl", "1");
