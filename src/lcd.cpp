@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <TFT_eSPI.h> // Hardware-specific library
+#include <TFT_eSPI.h>
 #include <SPI.h>
 #include <TMCStepper.h>
 
@@ -20,6 +20,8 @@
 #include "TFT_color.h"
 
 #include "global.h"
+
+#include "menuTypedef.h"
 
 #include "Roboto_Medium_en_ru_18.h"
 #include "Roboto_Medium_en_ru_20.h"
@@ -39,44 +41,25 @@ extern EncButton eb;
 // #define TFT_RST   4  // Reset pin (could connect to RST pin)
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 
-#define BLACK 0x0000
-#define WHITE 0xFFFF
-#define GREY 0x5AEB
-
-/* some RGB color definitions                                                 */
-#define Black 0x0000       /*   0,   0,   0 */
-#define Navy 0x000F        /*   0,   0, 128 */
-#define DarkGreen 0x03E0   /*   0, 128,   0 */
-#define DarkCyan 0x03EF    /*   0, 128, 128 */
-#define Maroon 0x7800      /* 128,   0,   0 */
-#define Purple 0x780F      /* 128,   0, 128 */
-#define Olive 0x7BE0       /* 128, 128,   0 */
-#define LightGrey 0xC618   /* 192, 192, 192 */
-#define DarkGrey 0x7BEF    /* 128, 128, 128 */
-#define Blue 0x001F        /*   0,   0, 255 */
-#define Green 0x07E0       /*   0, 255,   0 */
-#define Cyan 0x07FF        /*   0, 255, 255 */
-#define Red 0xF800         /* 255,   0,   0 */
-#define Magenta 0xF81F     /* 255,   0, 255 */
-#define Yellow 0xFFE0      /* 255, 255,   0 */
-#define White 0xFFFF       /* 255, 255, 255 */
-#define Orange 0xFD20      /* 255, 165,   0 */
-#define GreenYellow 0xAFE5 /* 173, 255,  47 */
-#define Pink 0xF81F
-
 // uint16 color = ((red>>3)<<11) | ((green>>2)<<5) | (blue>>3);
 
 TaskHandle_t TaskLcd;
 
 [[noreturn]] void TaskLcdLoop(void *parameter);
 
-void screen0();
+screenAction menu0;
+
+void screen0(screenAction *menu);
+
+void createMenu0();
 
 void lcdInit() {
+
+
     xTaskCreatePinnedToCore(
             TaskLcdLoop,    /* Функция для задачи */
             "TaskLcdLoop",     /* Имя задачи */
-            10000,         /* Размер стека */
+            20000,         /* Размер стека */
             NULL,          /* Параметр задачи */
             8,                /* Приоритет */
             &TaskLcd,     /* Выполняемая операция */
@@ -94,11 +77,11 @@ void lcdInit() {
 
     tft.loadFont(AA_FONT_SMALL); // Must load the font first
 
+    createMenu0();
+
     while (true) {
         // xSemaphoreTake(semaphore, portMAX_DELAY);
-        screen0();
-
-        // delay(10);
+        screen0(&menu0);
     }
 }
 
@@ -128,116 +111,181 @@ enum Screen0Lines {
     r4 = 8,
 };
 
-// Определение типа функции для обработки value
-typedef void (*ValueProcessor)(State<uint16_t> value);
+
+void ITEM(int line, itemAction *item, bool *isSelect) {
+
+    if (item->type == itemAction::SWITCH) {
+        if ((line == item->index) && (eb.press())) {
+            uint16_t a = item->value->get();
+            a = !a;
+            item->value->set(a);
+        }
+
+        auto s0 = (item->value->get()) ? item->textOn : item->textOff;
+
+        if (line == item->index)
+            Text(s0, item->x, item->y, item->colorActive, item->colorBg);
+        else
+            Text(s0, item->x, item->y, item->colorInactive, item->colorBg);
+        return;
+    }
+
+    if ((item->type == itemAction::EDITINT) || (item->type == itemAction::EDITINTMICROSTEP)) {
+
+        auto a = *isSelect;
+
+        if (line == item->index) {
+
+            if (eb.press()) {
+                a = !a;
+                *isSelect = a;
+            }
+
+            if (a) {
+
+                // Микрошаг
+                if (item->type == itemAction::EDITINT) {
+                    if (eb.right()) {
+                        uint16_t t = item->value->get() + item->step;
+                        if (t >= item->max)
+                            t = item->max;
+                        item->value->set(t);
+                    }
+                    if (eb.left()) {
+                        uint16_t t = item->value->get() - item->step;
+                        if (t <= item->min)
+                            t = item->min;
+                        item->value->set(t);
+                    }
+
+
+                }
+
+                if (item->type == itemAction::EDITINTMICROSTEP) {
+                    if (eb.right()) {
+                        uint16_t t = item->value->get() * 2;
+                        if (t >= item->max)
+                            t = item->max;
+                        item->value->set(t);
+                    }
+                    if (eb.left()) {
+                        uint16_t t = item->value->get() / 2;
+                        if (t <= item->min)
+                            t = item->min;
+                        item->value->set(t);
+                    }
+                }
+
+            }
+        }
+
+        String str11 = String(item->text) + item->value->get();
+
+        if (line == item->index) {
+
+            if (!a)
+                Text(str11, item->x, item->y, item->colorActive, item->colorBg);
+            else
+                Text(str11, item->x, item->y, item->colorBg, item->colorActive, true);
+
+        } else
+            Text(str11, item->x, item->y, item->colorInactive, item->colorBg);
+
+    }
+
+}
 
 /**
  * index - индекс в списке
  * line  - текущий индекс
  * isSelect - признак того что выбрана строка, обращается к общей &isSelect
  */
-void SWITCH(int index, int line, bool *isSelect, State<uint16_t> *value, String text_on, String text_off, int x, int y,
-            uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg) {
-    if ((line == index) && (eb.press())) {
-        uint16_t a = value->get();
-        a = !a;
-        value->set(a);
-    }
+//void SWITCH(int index, int line, bool *isSelect, State<uint16_t> *value, String text_on, String text_off, int x, int y,
+//            uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg) {
+//    if ((line == index) && (eb.press())) {
+//        uint16_t a = value->get();
+//        a = !a;
+//        value->set(a);
+//    }
+//
+//    auto s0 = (value->get()) ? text_on : text_off;
+//
+//    if (line == index)
+//        Text(s0, x, y, colorActive, colorBg);
+//    else
+//        Text(s0, x, y, colorInactve, colorBg);
+//}
+//
+//void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step,
+//             String text, int x, int y, uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg,
+//             const String &correction = "") {
+//
+//    auto a = *isSelect;
+//
+//    if (line == index) {
+//
+//        if (eb.press()) {
+//            a = !a;
+//            *isSelect = a;
+//        }
+//
+//        if (a) {
+//
+//            // Микрошаг
+//            if (correction == "") {
+//
+//                if (eb.right()) {
+//                    uint16_t t = value->get() + step;
+//                    if (t >= max)
+//                        t = max;
+//                    value->set(t);
+//                }
+//                if (eb.left()) {
+//                    uint16_t t = value->get() - step;
+//                    if (t <= min)
+//                        t = min;
+//                    value->set(t);
+//                }
+//            } else {
+//
+//                if (correction == "microstep") {
+//
+//                    if (eb.right()) {
+//                        uint16_t t = value->get() * 2;
+//                        if (t >= max)
+//                            t = max;
+//                        value->set(t);
+//                    }
+//                    if (eb.left()) {
+//                        uint16_t t = value->get() / 2;
+//                        if (t <= min)
+//                            t = min;
+//                        value->set(t);
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    String str11 = String(text) + value->get();
+//
+//    if (line == index) {
+//        if (!a)
+//            Text(str11, x, y, Yellow, colorBg);
+//        else
+//            Text(str11, x, y, colorBg, Yellow, true);
+//    } else
+//        Text(str11, x, y, colorInactve, colorBg);
+//}
 
-    auto s0 = (value->get()) ? text_on : text_off;
-
-    if (line == index)
-        Text(s0, x, y, colorActive, colorBg);
-    else
-        Text(s0, x, y, colorInactve, colorBg);
-}
-
-void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step,
-             String text, int x, int y, uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg,
-             const String& correction = "") {
-
-    auto a = *isSelect;
-
-    if (line == index) {
-
-        if (eb.press()) {
-            a = !a;
-            *isSelect = a;
-        }
-
-        if (a) {
-
-            // Микрошаг
-            if (correction == "") {
-
-                if (eb.right()) {
-                    uint16_t t = value->get() + step;
-                    if (t >= max)
-                        t = max;
-                    value->set(t);
-                }
-                if (eb.left()) {
-                    uint16_t t = value->get() - step;
-                    if (t <= min)
-                        t = min;
-                    value->set(t);
-                }
-            } else {
-
-                if (correction == "microstep") {
-
-                    if (eb.right()) {
-                        uint16_t t = value->get() * 2;
-                        if (t >= max)
-                            t = max;
-                        value->set(t);
-                    }
-                    if (eb.left()) {
-                        uint16_t t = value->get() / 2;
-                        if (t <= min)
-                            t = min;
-                        value->set(t);
-                    }
-                }
-            }
-        }
-    }
-
-    String str11 = String(text) + value->get();
-
-    if (line == index) {
-        if (!a)
-            Text(str11, x, y, Yellow, colorBg);
-        else
-            Text(str11, x, y, colorBg, Yellow, true);
-    } else
-        Text(str11, x, y, colorInactve, colorBg);
-}
-
-void screen0() {
-
-    int ITEMS_COUNT = 9;  // Количество елементов в списке
-    int ITEMS_WINDOW = 5; // Количество отображаемых елементов
+void screen0(screenAction *screen) {
 
     eb.tick();
 
-    static int line = 0; // Текущая строка
-    static bool isSelect = false;
-
     uint16_t colorBg = RGB565(0, 0, 128);
-    uint16_t colorInactve = DarkGrey;
-    uint16_t colorActive = Yellow;
-
-    int height = 26;
-    int startY = 5;
-    int startX = 6;
-
-    static int indexStartWindow = 0;
-    //int windowDelta = (ITEMS_WINDOW)-1;
-    static int indexEndWindow = ITEMS_WINDOW - 1;
 
     // scrollbar
-    float sbPercent = (float) (ITEMS_WINDOW) / (float) ITEMS_COUNT;
+    float sbPercent = (float) (screen->ITEMS_WINDOW) / (float) screen->ITEMS_COUNT;
     float sbMaxHeight = 131;                                // Максимальная высота всего скролл бар
     float sbActiveHeight = (float) sbMaxHeight * sbPercent; // Высота активной части
     int sbW = 3;                                            // Ширина
@@ -247,34 +295,34 @@ void screen0() {
     int sbY = 1;
     float sbOffsetY = 0.0f;
 
-    if (eb.turn() || (updateLcd == true) || eb.press()) {
+    if (eb.turn() || updateLcd || eb.press()) {
         updateLcd = false;
 
-        if (eb.turn() && !isSelect) {
+        if (eb.turn() && !screen->isSelect) {
             if (eb.right()) {
-                line++;
-                if (line > ITEMS_COUNT - 1)
-                    line = ITEMS_COUNT - 1;
+                screen->line++;
+                if (screen->line > screen->ITEMS_COUNT - 1)
+                    screen->line = screen->ITEMS_COUNT - 1;
 
-                if (line > indexEndWindow) {
-                    indexEndWindow = line;
-                    indexStartWindow = line - (ITEMS_WINDOW - 1);
-                    if (indexStartWindow < 0) indexStartWindow = 0;
+                if (screen->line > screen->indexEndWindow) {
+                    screen->indexEndWindow = screen->line;
+                    screen->indexStartWindow = screen->line - (screen->ITEMS_WINDOW - 1);
+                    if (screen->indexStartWindow < 0) screen->indexStartWindow = 0;
                 }
 
-                Serial2.printf("S:%d E:%d L:%d\n", indexStartWindow, indexEndWindow, line);
+                Serial2.printf("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
             }
             if (eb.left()) {
-                line--;
-                if (line < 0)
-                    line = 0;
+                screen->line--;
+                if (screen->line < 0)
+                    screen->line = 0;
 
-                if (line < indexStartWindow) {
-                    indexStartWindow = line;
-                    indexEndWindow = line + ITEMS_WINDOW - 1;
+                if (screen->line < screen->indexStartWindow) {
+                    screen->indexStartWindow = screen->line;
+                    screen->indexEndWindow = screen->line + screen->ITEMS_WINDOW - 1;
                 }
 
-                Serial2.printf("S:%d E:%d L:%d\n", indexStartWindow, indexEndWindow, line);
+                Serial2.printf("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
             }
         }
 
@@ -286,50 +334,109 @@ void screen0() {
         // tft.drawString(">", 2, line * height);
 
         int ii = 0;
-        for (int i = indexStartWindow; i <= indexEndWindow; i++) {
 
-            if (i == Screen0Lines::enable)
-                SWITCH(Screen0Lines::enable, line, &isSelect, &tmcDriverEnable, "Мотор: Вкл", "Мотор: Выкл", startX,
-                       ii * height + startY, colorActive, colorInactve, colorBg);
+        for (int i = screen->indexStartWindow; i <= screen->indexEndWindow; i++) {
 
-            if (i == Screen0Lines::chop)
-                SWITCH(Screen0Lines::chop, line, &isSelect, &tmcDriverChop, "Режим: StealthChop", "Режим: SpreadCycle",
-                       startX, ii * height + startY, colorActive, colorInactve, colorBg);
-
-            if (i == Screen0Lines::current)
-                EDITINT(Screen0Lines::current, line, &isSelect, &tmcDriverCurrent, 100, 4300, 100, "Ток: ", startX,
-                        ii * height + startY, colorActive, colorInactve, colorBg);
-
-            if (i == Screen0Lines::microstep)
-                EDITINT(Screen0Lines::microstep, line, &isSelect, &tmcDriverMicrostep, 1, 256, 1, "Микрошаг: ", startX,
-                        ii * height + startY, colorActive, colorInactve, colorBg, "microstep");
-
-            if (i == Screen0Lines::interpolation)
-                SWITCH(Screen0Lines::interpolation, line, &isSelect, &tmcDriverInterpolation, "Interpolation: Вкл",
-                       "Interpolation: Выкл", startX, ii * height + startY, colorActive, colorInactve, colorBg);
-
-            if (i == Screen0Lines::r1)
-                SWITCH(Screen0Lines::r1, line, &isSelect, &tmcDriverInterpolation, "r1: Вкл", "r1: Выкл", startX,
-                       ii * height + startY, colorActive, colorInactve, colorBg);
-
-            if (i == Screen0Lines::r2)
-                SWITCH(Screen0Lines::r2, line, &isSelect, &tmcDriverInterpolation, "r2: Вкл", "r2: Выкл", startX,
-                       ii * height + startY, colorActive, colorInactve, colorBg);
-
-            if (i == Screen0Lines::r3)
-                SWITCH(Screen0Lines::r3, line, &isSelect, &tmcDriverInterpolation, "r3: Вкл", "r3: Выкл", startX,
-                       ii * height + startY, colorActive, colorInactve, colorBg);
-
-            if (i == Screen0Lines::r4)
-                SWITCH(Screen0Lines::r4, line, &isSelect, &tmcDriverInterpolation, "r4: Вкл", "r4: Выкл", startX,
-                       ii * height + startY, colorActive, colorInactve, colorBg);
-
+            screen->items[i].x = menu0.startX;
+            screen->items[i].y = ii * menu0.height + menu0.startY;
+            screen->items[i].colorActive = screen->colorActive;
+            screen->items[i].colorInactive = screen->colorInactive;
+            screen->items[i].colorBg = screen->colorBg;
+            ITEM(screen->line, &screen->items[i], &screen->isSelect);
             ii++;
         }
-
-        tft.fillRect(sbX, sbY, sbW, (int)sbMaxHeight, sbColorBg);
-        int a = (float) indexStartWindow / (float) ITEMS_COUNT * sbMaxHeight;
+        tft.fillRect(sbX, sbY, sbW, (int) sbMaxHeight, sbColorBg);
+        int a = (float) screen->indexStartWindow / (float) screen->ITEMS_COUNT * sbMaxHeight;
         tft.fillRect(sbX + 1, sbY + a, sbW - 2, sbActiveHeight, sbColor);
     }
+
     delay(5);
 }
+
+
+itemAction createDefaultItemAction() {
+    return itemAction{
+            .type = itemAction::NONE,
+            .index = 0,
+            .line = nullptr,
+            //.isSelect = nullptr,
+            .value = nullptr,
+            .min = 0,
+            .max = 1,
+            .step = 1,
+            .textOn = "on",
+            .textOff = "off",
+            .text = "?",
+            .correction = "",
+            .x = 0,
+            .y = 0,
+            .colorActive = Yellow,
+            .colorInactive = DarkGrey,
+            .colorBg = DarkGrey,
+    };
+};
+
+void createMenu0() {
+
+    itemAction actions0;// = createDefaultItemAction();
+    actions0.type = itemAction::SWITCH;
+    actions0.index = 0,
+    actions0.line = &menu0.line,
+    //actions0.isSelect = &menu0.isSelect,
+    actions0.value = &tmcDriverEnable,
+    actions0.textOn = "Мотор: Вкл",
+    actions0.textOff = "Мотор: Выкл",
+
+            menu0.addMenuAction(actions0);
+
+    itemAction actions1;// = createDefaultItemAction();
+    actions1.type = itemAction::SWITCH;
+    actions1.index = 1,
+    actions1.line = &menu0.line,
+    //actions1.isSelect = &menu0.isSelect,
+    actions1.value = &tmcDriverChop,
+    actions1.textOn = "Режим: StealthChop",
+    actions1.textOff = "Режим: SpreadCycle",
+
+            menu0.addMenuAction(actions1);
+
+    itemAction actions2;// = createDefaultItemAction();
+    actions2.type = itemAction::EDITINT;
+    actions2.index = 2,
+    actions2.line = &menu0.line,
+    //actions2.isSelect = &menu0.isSelect,
+    actions2.value = &tmcDriverCurrent,
+    actions2.text = "Ток: ",
+    actions2.min = 100,
+    actions2.max = 3100;
+    actions2.step = 100;
+    menu0.addMenuAction(actions2);
+
+    itemAction actions3;// = createDefaultItemAction();
+    actions3.type = itemAction::EDITINTMICROSTEP;
+    actions3.index = 3,
+    actions3.line = &menu0.line,
+    //actions3.isSelect = &menu0.isSelect,
+    actions3.value = &tmcDriverMicrostep,
+    actions3.text = "Микрошаг: ",
+    actions3.min = 1,
+    actions3.max = 256;
+    actions3.step = 1;
+    menu0.addMenuAction(actions3);
+
+    itemAction actions4;// = createDefaultItemAction();
+    actions4.type = itemAction::SWITCH;
+    actions4.index = 4,
+    actions4.line = &menu0.line,
+    //actions4.isSelect = &menu0.isSelect,
+    actions4.value = &tmcDriverInterpolation,
+    actions4.textOn = "Interpolation: Вкл",
+    actions4.textOff = "Interpolation: Выкл",
+
+            menu0.addMenuAction(actions4);
+
+    menu0.ITEMS_COUNT = 5;
+    menu0.ITEMS_WINDOW = 5;
+
+}
+
