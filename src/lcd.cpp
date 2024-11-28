@@ -437,6 +437,7 @@ void createMenu0() {
 
     menu0.ITEMS_COUNT = 5;
     menu0.ITEMS_WINDOW = 5;
+    menu0.indexEndWindow = menu0.ITEMS_WINDOW - 1;
 
 }
 
