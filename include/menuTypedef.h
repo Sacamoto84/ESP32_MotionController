@@ -27,28 +27,18 @@ struct itemAction {
         EDITINTMICROSTEP,
         TEXT,
         BUTTON
-    } type; // По умолчанию элемент пустой
-
-    // Дополнительные параметры для вызова функций
-    int index;
-    int *line;
-
-    //bool *isSelect;
+    } type = NONE; // По умолчанию элемент пустой
 
     State<uint16_t> *value;
 
-    uint16_t min;
-    uint16_t max;
-    uint16_t step;
+    uint16_t min=0;
+    uint16_t max=1;
+    uint16_t step=1;
 
-    String textOn;
-    String textOff;
-    String text;
-    String correction;
-
-    //Координаты отрисовки
-    int16_t x;
-    int16_t y;
+    String textOn="";
+    String textOff="";
+    String text="";
+    //String correction;
 
      //Цвета
     uint16_t colorActive;
@@ -57,9 +47,9 @@ struct itemAction {
 
     bool skipping = false;
 
-    CallbackType callback; // Коллбек как указатель на функцию
+    CallbackType callback = nullptr; // Коллбек как указатель на функцию
 
-    void executeCallback(int data) {
+    void executeCallback(int data) const {
         if (callback) {
             callback(data);
         }
@@ -91,7 +81,7 @@ struct screenAction {
     std::vector<itemAction> items; // Динамический список элементов MenuAction
 
     // Метод для добавления нового действия
-    void addMenuAction(const itemAction &action) {
+    void addMenuAction(const itemAction& action) {
         items.push_back(action);
     }
 
