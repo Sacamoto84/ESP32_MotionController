@@ -8,13 +8,6 @@
 #include "state.h"
 #include "TFT_color.h"
 
-//// Типы функций
-//using SwitchFunction = void(*)(int index, int line, bool *isSelect, State<uint16_t> *value, String text_on, String text_off, int x, int y,
-//                               uint16_t colorActive, uint16_t colorInactive, uint16_t colorBg);
-//
-//using EditIntFunction = void(*)(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step,
-//                                String text, int x, int y, uint16_t colorActive, uint16_t colorInactive, uint16_t colorBg, const String& correction);
-
 // Определяем тип коллбека
 typedef void (*CallbackType)(int);
 
@@ -31,9 +24,9 @@ struct itemAction {
 
     State<uint16_t> *value;
 
-    String textOn="";
-    String textOff="";
-    String text="";
+    char * textOn;
+    char * textOff;
+    String text;
     //String correction;
 
     uint16_t min=0;
@@ -63,7 +56,7 @@ struct screenAction {
     bool isSelect = false;
     int line = 0;
 
-    int ITEMS_COUNT = 2;  // Количество елементов в списке
+    uint ITEMS_COUNT = 2;  // Количество елементов в списке
     int ITEMS_WINDOW = 2; // Количество отображаемых елементов
 
     int height = 26;
