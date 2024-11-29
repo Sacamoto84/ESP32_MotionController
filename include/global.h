@@ -5,6 +5,9 @@
 
 #include "state.h"
 #include "tmcGlobal.h"
+#include "Timber.h"
+
+extern timber Timber;
 
 extern void observer();
 

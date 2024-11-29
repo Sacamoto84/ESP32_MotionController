@@ -329,14 +329,17 @@ void createMenuMain() {
 
     itemAction actions;
 
-    actions.callback = nullptr;
-
     actions.type = itemAction::SWITCH;
     actions.value = &tmcDriverEnable;
-    actions.textOn = "Мотор: Вкл";
+    actions.textOn = "12345Мотор: Вкл";
     actions.textOff = "Мотор: Выкл";
     menuMain.addMenuAction(actions);
+    Serial2.println(actions.textOn);
+
+    Timber.i(actions.textOn.c_str());
+
     ///////////////////////////////////
+
     itemAction actions1;
     actions1.type = itemAction::BUTTON;
     //actions1.line = &menuMain.line;

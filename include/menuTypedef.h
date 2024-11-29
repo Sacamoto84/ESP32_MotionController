@@ -31,14 +31,14 @@ struct itemAction {
 
     State<uint16_t> *value;
 
-    uint16_t min=0;
-    uint16_t max=1;
-    uint16_t step=1;
-
     String textOn="";
     String textOff="";
     String text="";
     //String correction;
+
+    uint16_t min=0;
+    uint16_t max=1;
+    uint16_t step=1;
 
      //Цвета
     uint16_t colorActive;

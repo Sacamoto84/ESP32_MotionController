@@ -1,5 +1,7 @@
 #include "global.h"
 
+timber Timber;
+
 State<uint16_t> tmcDriverEnable(0);
 State<uint16_t> tmcDriverChop(0);
 State<uint16_t> tmcDriverCurrent(1000); //Ток двайвера
