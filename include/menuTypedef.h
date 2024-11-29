@@ -15,6 +15,8 @@
 //using EditIntFunction = void(*)(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step,
 //                                String text, int x, int y, uint16_t colorActive, uint16_t colorInactive, uint16_t colorBg, const String& correction);
 
+// Определяем тип коллбека
+typedef void (*CallbackType)(int);
 
 struct itemAction {
 
@@ -53,8 +55,17 @@ struct itemAction {
     uint16_t colorInactive ;
     uint16_t colorBg;
 
-    bool scipping = false;
+    bool skipping = false;
+
+    CallbackType callback; // Коллбек как указатель на функцию
+
+    void executeCallback(int data) {
+        if (callback) {
+            callback(data);
+        }
+    }
 };
+
 
 
 struct screenAction {
@@ -83,6 +94,8 @@ struct screenAction {
     void addMenuAction(const itemAction &action) {
         items.push_back(action);
     }
+
+
 
 };
 

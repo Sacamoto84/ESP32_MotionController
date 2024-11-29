@@ -203,7 +203,18 @@ void ITEM(int line, itemAction *item, bool *isSelect) {
         return;
     }
 
+    if (item->type == itemAction::BUTTON) {
+        String str11 = String(item->text);
+        if (line == item->index) {
+            Text(str11, item->x, item->y, item->colorActive, item->colorBg);
+        } else
+            Text(str11, item->x, item->y, item->colorInactive, item->colorBg);
 
+        if (eb.press()) {
+          item->executeCallback(0);
+        }
+        return;
+    }
 
 
 }
@@ -232,7 +243,7 @@ void screen0(screenAction *screen) {
             if (eb.right()) {
                 screen->line++;
 
-                if (screen->items[screen->line].scipping){
+                if (screen->items[screen->line].skipping){
                     screen->line++;
                 }
 
@@ -252,7 +263,7 @@ void screen0(screenAction *screen) {
 
                 screen->line--;
 
-                if (screen->items[screen->line].scipping){
+                if (screen->items[screen->line].skipping){
                     screen->line--;
                 }
 
@@ -382,7 +393,7 @@ void createMenu0() {
     actions.line = &menu0.line;
             //actions4.isSelect = &menu0.isSelect,
     actions.text = "Текст0";
-    actions.scipping = true;
+    actions.skipping = true;
     menu0.addMenuAction(actions);
     ///////////////////////////////////
     actions.type = itemAction::TEXT;
@@ -391,19 +402,33 @@ void createMenu0() {
             //actions4.isSelect = &menu0.isSelect,
     actions.text = "Текст1";
 
-    actions.scipping = false;
+    actions.skipping = false;
+    menu0.addMenuAction(actions);
+    ///////////////////////////////////
+    actions.type = itemAction::BUTTON;
+    actions.index = 7;
+    actions.line = &menu0.line;
+    actions.text = "Button";
+    actions.skipping = false;
+
+    // Устанавливаем лямбду как коллбек
+    actions.callback = [](int data) {
+        Serial2.println("Нажата кнопка");
+    };
+
     menu0.addMenuAction(actions);
     ///////////////////////////////////
     actions.type = itemAction::TEXT;
-    actions.index = 7;
+    actions.index = 8;
     actions.line = &menu0.line;
             //actions4.isSelect = &menu0.isSelect,
     actions.text = "Текст2";
-            actions.scipping = false;
+            actions.skipping = false;
+    actions.callback = nullptr;
             menu0.addMenuAction(actions);
 
     ///////////////////////////////////
-    menu0.ITEMS_COUNT = 8;
+    menu0.ITEMS_COUNT = menu0.items.size();
     menu0.ITEMS_WINDOW = 5;
     menu0.indexEndWindow = menu0.ITEMS_WINDOW - 1;
 
