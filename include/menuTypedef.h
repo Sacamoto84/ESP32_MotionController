@@ -24,6 +24,7 @@ struct itemAction {
         EDITINT,    // Действие EDITINT
         EDITINTMICROSTEP,
         TEXT,
+        BUTTON
     } type; // По умолчанию элемент пустой
 
     // Дополнительные параметры для вызова функций
@@ -52,6 +53,7 @@ struct itemAction {
     uint16_t colorInactive ;
     uint16_t colorBg;
 
+    bool scipping = false;
 };
 
 

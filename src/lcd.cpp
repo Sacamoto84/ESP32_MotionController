@@ -191,92 +191,22 @@ void ITEM(int line, itemAction *item, bool *isSelect) {
         } else
             Text(str11, item->x, item->y, item->colorInactive, item->colorBg);
 
+        return;
     }
 
-}
+    if (item->type == itemAction::TEXT) {
+        String str11 = String(item->text);
+        if (line == item->index) {
+            Text(str11, item->x, item->y, item->colorActive, item->colorBg);
+        } else
+            Text(str11, item->x, item->y, item->colorInactive, item->colorBg);
+        return;
+    }
 
-/**
- * index - индекс в списке
- * line  - текущий индекс
- * isSelect - признак того что выбрана строка, обращается к общей &isSelect
- */
-//void SWITCH(int index, int line, bool *isSelect, State<uint16_t> *value, String text_on, String text_off, int x, int y,
-//            uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg) {
-//    if ((line == index) && (eb.press())) {
-//        uint16_t a = value->get();
-//        a = !a;
-//        value->set(a);
-//    }
-//
-//    auto s0 = (value->get()) ? text_on : text_off;
-//
-//    if (line == index)
-//        Text(s0, x, y, colorActive, colorBg);
-//    else
-//        Text(s0, x, y, colorInactve, colorBg);
-//}
-//
-//void EDITINT(int index, int line, bool *isSelect, State<uint16_t> *value, uint16_t min, uint16_t max, uint16_t step,
-//             String text, int x, int y, uint16_t colorActive, uint16_t colorInactve, uint16_t colorBg,
-//             const String &correction = "") {
-//
-//    auto a = *isSelect;
-//
-//    if (line == index) {
-//
-//        if (eb.press()) {
-//            a = !a;
-//            *isSelect = a;
-//        }
-//
-//        if (a) {
-//
-//            // Микрошаг
-//            if (correction == "") {
-//
-//                if (eb.right()) {
-//                    uint16_t t = value->get() + step;
-//                    if (t >= max)
-//                        t = max;
-//                    value->set(t);
-//                }
-//                if (eb.left()) {
-//                    uint16_t t = value->get() - step;
-//                    if (t <= min)
-//                        t = min;
-//                    value->set(t);
-//                }
-//            } else {
-//
-//                if (correction == "microstep") {
-//
-//                    if (eb.right()) {
-//                        uint16_t t = value->get() * 2;
-//                        if (t >= max)
-//                            t = max;
-//                        value->set(t);
-//                    }
-//                    if (eb.left()) {
-//                        uint16_t t = value->get() / 2;
-//                        if (t <= min)
-//                            t = min;
-//                        value->set(t);
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    String str11 = String(text) + value->get();
-//
-//    if (line == index) {
-//        if (!a)
-//            Text(str11, x, y, Yellow, colorBg);
-//        else
-//            Text(str11, x, y, colorBg, Yellow, true);
-//    } else
-//        Text(str11, x, y, colorInactve, colorBg);
-//}
+
+
+
+}
 
 void screen0(screenAction *screen) {
 
@@ -301,6 +231,11 @@ void screen0(screenAction *screen) {
         if (eb.turn() && !screen->isSelect) {
             if (eb.right()) {
                 screen->line++;
+
+                if (screen->items[screen->line].scipping){
+                    screen->line++;
+                }
+
                 if (screen->line > screen->ITEMS_COUNT - 1)
                     screen->line = screen->ITEMS_COUNT - 1;
 
@@ -312,10 +247,18 @@ void screen0(screenAction *screen) {
 
                 Serial2.printf("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
             }
+
             if (eb.left()) {
+
                 screen->line--;
-                if (screen->line < 0)
+
+                if (screen->items[screen->line].scipping){
+                    screen->line--;
+                }
+
+                if (screen->line < 0) {
                     screen->line = 0;
+                }
 
                 if (screen->line < screen->indexStartWindow) {
                     screen->indexStartWindow = screen->line;
@@ -354,88 +297,113 @@ void screen0(screenAction *screen) {
 }
 
 
-itemAction createDefaultItemAction() {
-    return itemAction{
-            .type = itemAction::NONE,
-            .index = 0,
-            .line = nullptr,
-            //.isSelect = nullptr,
-            .value = nullptr,
-            .min = 0,
-            .max = 1,
-            .step = 1,
-            .textOn = "on",
-            .textOff = "off",
-            .text = "?",
-            .correction = "",
-            .x = 0,
-            .y = 0,
-            .colorActive = Yellow,
-            .colorInactive = DarkGrey,
-            .colorBg = DarkGrey,
-    };
-};
+//itemAction createDefaultItemAction() {
+//    return itemAction{
+//            .type = itemAction::NONE,
+//            .index = 0,
+//            .line = nullptr,
+//            //.isSelect = nullptr,
+//            .value = nullptr,
+//            .min = 0,
+//            .max = 1,
+//            .step = 1,
+//            .textOn = "on",
+//            .textOff = "off",
+//            .text = "?",
+//            .correction = "",
+//            .x = 0,
+//            .y = 0,
+//            .colorActive = Yellow,
+//            .colorInactive = DarkGrey,
+//            .colorBg = DarkGrey,
+//    };
+//};
 
 void createMenu0() {
 
-    itemAction actions0;// = createDefaultItemAction();
-    actions0.type = itemAction::SWITCH;
-    actions0.index = 0,
-    actions0.line = &menu0.line,
+    itemAction actions;// = createDefaultItemAction();
+    actions.type = itemAction::SWITCH;
+    actions.index = 0;
+    actions.line = &menu0.line;
     //actions0.isSelect = &menu0.isSelect,
-    actions0.value = &tmcDriverEnable,
-    actions0.textOn = "Мотор: Вкл",
-    actions0.textOff = "Мотор: Выкл",
+    actions.value = &tmcDriverEnable;
+    actions.textOn = "Мотор: Вкл";
+    actions.textOff = "Мотор: Выкл";
 
-            menu0.addMenuAction(actions0);
+            menu0.addMenuAction(actions);
 
-    itemAction actions1;// = createDefaultItemAction();
-    actions1.type = itemAction::SWITCH;
-    actions1.index = 1,
-    actions1.line = &menu0.line,
+
+    actions.type = itemAction::SWITCH;
+    actions.index = 1;
+    actions.line = &menu0.line;
     //actions1.isSelect = &menu0.isSelect,
-    actions1.value = &tmcDriverChop,
-    actions1.textOn = "Режим: StealthChop",
-    actions1.textOff = "Режим: SpreadCycle",
+    actions.value = &tmcDriverChop;
+    actions.textOn = "Режим: StealthChop";
+    actions.textOff = "Режим: SpreadCycle";
+            menu0.addMenuAction(actions);
 
-            menu0.addMenuAction(actions1);
-
-    itemAction actions2;// = createDefaultItemAction();
-    actions2.type = itemAction::EDITINT;
-    actions2.index = 2,
-    actions2.line = &menu0.line,
+    //itemAction actions2;// = createDefaultItemAction();
+    actions.type = itemAction::EDITINT;
+    actions.index = 2,
+    actions.line = &menu0.line;
     //actions2.isSelect = &menu0.isSelect,
-    actions2.value = &tmcDriverCurrent,
-    actions2.text = "Ток: ",
-    actions2.min = 100,
-    actions2.max = 3100;
-    actions2.step = 100;
-    menu0.addMenuAction(actions2);
+    actions.value = &tmcDriverCurrent;
+    actions.text = "Ток: ";
+    actions.min = 100;
+    actions.max = 3100;
+    actions.step = 100;
+    menu0.addMenuAction(actions);
 
     itemAction actions3;// = createDefaultItemAction();
-    actions3.type = itemAction::EDITINTMICROSTEP;
-    actions3.index = 3,
-    actions3.line = &menu0.line,
+    actions.type = itemAction::EDITINTMICROSTEP;
+    actions.index = 3;
+    actions.line = &menu0.line;
     //actions3.isSelect = &menu0.isSelect,
-    actions3.value = &tmcDriverMicrostep,
-    actions3.text = "Микрошаг: ",
-    actions3.min = 1,
-    actions3.max = 256;
-    actions3.step = 1;
-    menu0.addMenuAction(actions3);
+    actions.value = &tmcDriverMicrostep;
+    actions.text = "Микрошаг: ";
+    actions.min = 1;
+    actions.max = 256;
+    actions.step = 1;
+    menu0.addMenuAction(actions);
 
-    itemAction actions4;// = createDefaultItemAction();
-    actions4.type = itemAction::SWITCH;
-    actions4.index = 4,
-    actions4.line = &menu0.line,
+    //itemAction actions4;// = createDefaultItemAction();
+    actions.type = itemAction::SWITCH;
+    actions.index = 4;
+    actions.line = &menu0.line;
     //actions4.isSelect = &menu0.isSelect,
-    actions4.value = &tmcDriverInterpolation,
-    actions4.textOn = "Interpolation: Вкл",
-    actions4.textOff = "Interpolation: Выкл",
+    actions.value = &tmcDriverInterpolation;
+    actions.textOn = "Interpolation: Вкл";
+    actions.textOff = "Interpolation: Выкл";
+            menu0.addMenuAction(actions);
 
-            menu0.addMenuAction(actions4);
+    //itemAction actions;// = createDefaultItemAction();
+    actions.type = itemAction::TEXT;
+    actions.index = 5;
+    actions.line = &menu0.line;
+            //actions4.isSelect = &menu0.isSelect,
+    actions.text = "Текст0";
+    actions.scipping = true;
+    menu0.addMenuAction(actions);
+    ///////////////////////////////////
+    actions.type = itemAction::TEXT;
+    actions.index = 6;
+    actions.line = &menu0.line;
+            //actions4.isSelect = &menu0.isSelect,
+    actions.text = "Текст1";
 
-    menu0.ITEMS_COUNT = 5;
+    actions.scipping = false;
+    menu0.addMenuAction(actions);
+    ///////////////////////////////////
+    actions.type = itemAction::TEXT;
+    actions.index = 7;
+    actions.line = &menu0.line;
+            //actions4.isSelect = &menu0.isSelect,
+    actions.text = "Текст2";
+            actions.scipping = false;
+            menu0.addMenuAction(actions);
+
+    ///////////////////////////////////
+    menu0.ITEMS_COUNT = 8;
     menu0.ITEMS_WINDOW = 5;
     menu0.indexEndWindow = menu0.ITEMS_WINDOW - 1;
 
