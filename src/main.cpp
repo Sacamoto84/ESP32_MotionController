@@ -16,9 +16,6 @@
 
 extern EncButton eb;
 
-int var1 = 0;
-int var2 = 0;
-int var3 = 0;
 
 extern void lcdInit();
 
@@ -38,7 +35,33 @@ IRAM_ATTR void isr() {
     eb.tickISR();
 }
 
+#define FREQUENCY 100000 // Частота меандра в Гц (1 кГц)
+
+hw_timer_t *timer = nullptr;
+
+volatile bool state = false;
+
+void IRAM_ATTR onTimer() {
+
+    state = !state; // Переключаем состояние
+
+    //Режим постоянный
+//    if (currentMode == WorkMode::CONTINUOUS) {
+//        digitalWrite(STEP_PIN, state);
+//    }
+
+    stepper.tick();
+
+}
+
 void setup() {
+
+    // Создаем таймер
+    timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
+    timerAttachInterrupt(timer, &onTimer, true);
+    timerAlarmWrite(timer, 1000000 / (FREQUENCY * 2), true); // Половина периода
+    timerAlarmEnable(timer);
+
 
     observer();
 
@@ -65,15 +88,17 @@ void setup() {
     pinMode(STEP_PIN, OUTPUT);
     pinMode(DIR_PIN, OUTPUT);
 
-    digitalWrite(EN_PIN, LOW); // Enable driver in hardware
+    tmcDriverEnable.set(true);
 
     driver.begin(); //  SPI: Init CS pins and possible SW SPI pins
+
     // UART: Init SW UART (if selected) with default 115200 baudrate
     driver.toff(5); // Enables driver in software
 
-    driver.rms_current(2100); // Set motor RMS current
-
-    driver.microsteps(2); // Set microsteps to 1/16th
+    //driver.rms_current(1200); // Set motor RMS current
+    tmcDriverCurrent.set(700);
+    tmcDriverMicrostep.set(0);
+    //driver.microsteps(0); // Set microsteps to 1/16th
 
 
     uint32_t drv_status = driver.DRV_STATUS();
@@ -101,12 +126,55 @@ void setup() {
 
     BLE_init();
 
+    stepper.setMaxSpeed(1000000);
+    tmcStepperMaxSpeed.set(4000);
+    tmcStepperSetTarget.set(50);
+    //stepper.setAcceleration(2000); // ускорение
+
 }
 
-
-uint8_t select1;  // выбранная переменная
+bool dir = 1;
 
 void loop() {
+
+    // здесь происходит движение моторов, вызывать как можно чаще
+
+    //Режим постоянный
+//    if (currentMode == WorkMode::CONTINUOUS) {
+//        digitalWrite(STEP_PIN, state);
+//    }
+
+
+
+
+    //if (currentMode == WorkMode::VIBRO) {
+
+    if (stepper.ready()) {
+        dir = !dir;   // разворачиваем
+        stepper.setTarget(dir * tmcStepperSetTarget.get()); // едем в другую сторону
+    }
+
+    //}
+
+
+//    //Режим постоянный
+//    if (currentMode == WorkMode::CONTINUOUS) {
+//
+//        digitalWrite(STEP_PIN, HIGH);
+//        // // lay(1);
+//        delayMicroseconds(2000);
+//        digitalWrite(STEP_PIN, LOW);
+//        // // delay(1);
+//        delayMicroseconds(2000);
+//
+//    }
+//
+//    if (currentMode == WorkMode::VIBRO) {
+//
+//
+//    }
+
+
 
     //  eb.tick();
     //  // выбор переменной для изменения

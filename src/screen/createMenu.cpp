@@ -6,30 +6,46 @@
 
 //
 screenAction menuConfig;
-screenAction menuMain;
+screenAction menuContinuous;
+screenAction menuVibro;
 
 //Создание списка отображения
-void createMenuMain() {
+void createMenuContinuous() {
     itemAction actions;
 
     actions.type = itemAction::TEXT;
     actions.text = (char*)"Режим: Постоянный";
-    menuMain.addMenuAction(actions);
+    menuContinuous.addMenuAction(actions);
 
     actions.type = itemAction::SWITCH;
     actions.value = &tmcDriverEnable;
     actions.textOn = (char*)"Мотор: Вкл";
     actions.textOff = (char*)"Мотор: Выкл";
-    menuMain.addMenuAction(actions);
+    menuContinuous.addMenuAction(actions);
 
     actions.type = itemAction::TEXT;
     actions.text = (char*)"Направление: ->";
-    menuMain.addMenuAction(actions);
+    menuContinuous.addMenuAction(actions);
 
-    actions.type = itemAction::TEXT;
-    actions.text = (char*)"Скорость: 20 имп/c";
-    menuMain.addMenuAction(actions);
+    actions.type = itemAction::EDITINT;
+    actions.text = (char*)"Скорость: ";
+    actions.testSuffix = (char *)"";
+    actions.value = &tmcStepperMaxSpeed;
+    actions.min = 0;
+    actions.max= 100000;
+    actions.step= 1000;
+    menuContinuous.addMenuAction(actions);
 
+    actions.type = itemAction::EDITINT_I32;
+    actions.text = (char*)"Амплитуда: ";
+    actions.testSuffix = (char *)"";
+    actions.value = nullptr;
+    actions.value_i32 = &tmcStepperSetTarget;
+    actions.min = 0;
+    actions.max= 1000000;
+    actions.step= 100;
+    menuContinuous.addMenuAction(actions);
+    actions.value_i32 = nullptr;
     ///////////////////////////////////
     actions.type = itemAction::BUTTON;
     actions.text = "Настройка";
@@ -38,15 +54,24 @@ void createMenuMain() {
         currentScreen = CONFIG;
         update();
     };
-    menuMain.addMenuAction(actions);
+    menuContinuous.addMenuAction(actions);
     actions.callback = nullptr;
     //////////////////////////////////
 
+    actions.type = itemAction::BUTTON;
+    actions.text = "Перезагрузка";
+    actions.callback = [](int data) {
+        esp_restart();
+    };
+    menuContinuous.addMenuAction(actions);
+    actions.callback = nullptr;
+
     //////////////////////////////////
-    menuMain.ITEMS_COUNT = menuMain.items.size();
-    menuMain.ITEMS_WINDOW = 6;
-    menuMain.indexEndWindow = menuMain.ITEMS_WINDOW - 1;
+    menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
+    menuContinuous.ITEMS_WINDOW = 6;
+    menuContinuous.indexEndWindow = menuContinuous.ITEMS_WINDOW - 1;
 }
+
 //Создание списка настройки
 void createMenuConfig() {
 
@@ -125,5 +150,55 @@ void createMenuConfig() {
     menuConfig.ITEMS_COUNT = menuConfig.items.size();
     menuConfig.ITEMS_WINDOW = 6;
     menuConfig.indexEndWindow = menuConfig.ITEMS_WINDOW - 1;
+
+}
+
+void createMenuVibro(){
+    itemAction actions;
+
+    actions.type = itemAction::TEXT;
+    actions.text = (char*)"Режим: Вибро";
+    menuContinuous.addMenuAction(actions);
+
+    actions.type = itemAction::SWITCH;
+    actions.value = &tmcDriverEnable;
+    actions.textOn = (char*)"Мотор: Вкл";
+    actions.textOff = (char*)"Мотор: Выкл";
+    menuContinuous.addMenuAction(actions);
+
+    actions.type = itemAction::TEXT;
+    actions.text = (char*)"Направление: ->";
+    menuContinuous.addMenuAction(actions);
+
+    actions.type = itemAction::TEXT;
+    actions.text = (char*)"Скорость: 20 имп/c";
+    menuContinuous.addMenuAction(actions);
+
+    ///////////////////////////////////
+    actions.type = itemAction::BUTTON;
+    actions.text = "Настройка";
+    actions.callback = [](int data) {
+        Serial2.println("Нажата кнопка: Настройка");
+        currentScreen = CONFIG;
+        update();
+    };
+    menuContinuous.addMenuAction(actions);
+    actions.callback = nullptr;
+    //////////////////////////////////
+
+    actions.type = itemAction::BUTTON;
+    actions.text = "Перезагрузка";
+    actions.callback = [](int data) {
+        esp_restart();
+    };
+    menuContinuous.addMenuAction(actions);
+    actions.callback = nullptr;
+
+    //////////////////////////////////
+    menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
+    menuContinuous.ITEMS_WINDOW = 6;
+    menuContinuous.indexEndWindow = menuContinuous.ITEMS_WINDOW - 1;
+
+
 
 }

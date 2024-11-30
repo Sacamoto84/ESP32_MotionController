@@ -11,15 +11,18 @@
 enum CurrenScreen {
     MAIN,
     CONFIG,
+    VIBRO,
 };
 
 extern screenAction menuConfig;
-extern screenAction menuMain;
+extern screenAction menuContinuous;
+extern screenAction menuVibro;
 
 extern enum CurrenScreen currentScreen;
 
 void createMenuConfig();
-void createMenuMain();
+void createMenuContinuous();
+void createMenuVibro();
 
 
 

@@ -17,12 +17,14 @@ struct itemAction {
         NONE,      // Элемент не используется
         SWITCH,    // Действие SWITCH
         EDITINT,    // Действие EDITINT
+        EDITINT_I32,    // Действие EDITINT
         EDITINTMICROSTEP,
         TEXT,
         BUTTON
     } type = NONE; // По умолчанию элемент пустой
 
-    State<uint16_t> *value;
+    State<uint16_t> *value = nullptr;
+    State<int32_t> *value_i32 = nullptr;
 
     char * textOn;
     char * textOff;
@@ -31,9 +33,9 @@ struct itemAction {
     String text;
     //String correction;
 
-    uint16_t min=0;
-    uint16_t max=1;
-    uint16_t step=1;
+    int32_t min=0;
+    int32_t max=1;
+    int16_t step=1;
 
      //Цвета
     uint16_t colorActive;

@@ -64,19 +64,24 @@ void lcdInit() {
 
     tft.loadFont(AA_FONT_SMALL); // Must load the font first
 
-    createMenuMain();
+    createMenuContinuous();
     createMenuConfig();
+    createMenuVibro();
 
     screenAction *s;
 
     while (true) {
         switch (currentScreen) {
             case MAIN:
-                s = &menuMain;
+                s = &menuContinuous;
                 break;
 
             case CONFIG:
                 s = &menuConfig;
+                break;
+
+            case VIBRO:
+                s = &menuVibro;
                 break;
         }
 
@@ -182,6 +187,67 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
 
         return;
     }
+
+
+
+
+    if (item->type == itemAction::EDITINT_I32) {
+        //Serial2.println("item->type == itemAction::EDITINT EDITINTMICROSTEP");
+        auto a = *isSelect;
+
+        if (line == index) {
+
+            if (eb.press()) {
+                a = !a;
+                *isSelect = a;
+            }
+
+            if (a) {
+
+                    if (eb.right()) {
+                        int32_t t = item->value_i32->get() + item->step;
+                        if (t >= item->max)
+                            t = item->max;
+                        item->value_i32->set(t);
+                    }
+                    if (eb.left()) {
+                        int32_t t = item->value_i32->get() - item->step;
+                        if (t <= item->min)
+                            t = item->min;
+                        item->value_i32->set(t);
+                    }
+
+            }
+        }
+
+        String str11 = String(item->text) + item->value_i32->get() + item->testSuffix;
+
+        if (line == index) {
+
+            if (!a)
+                Text(str11, x, y, item->colorActive, item->colorBg);
+            else
+                Text(str11, x, y, item->colorBg, item->colorActive, true);
+
+        } else
+            Text(str11, x, y, item->colorInactive, item->colorBg);
+
+        return;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     if (item->type == itemAction::TEXT) {
         //Serial2.println("item->type == itemAction::TEXT");
