@@ -26,6 +26,8 @@ struct itemAction {
 
     char * textOn;
     char * textOff;
+    char * testSuffix;
+
     String text;
     //String correction;
 
@@ -59,9 +61,9 @@ struct screenAction {
     uint ITEMS_COUNT = 2;  // Количество елементов в списке
     int ITEMS_WINDOW = 2; // Количество отображаемых елементов
 
-    int height = 26;
-    int startY = 5;
-    int startX = 6;
+    int16_t height = 21; //26
+    int16_t startY = 5;
+    int16_t startX = 6;
 
     int indexStartWindow = 0;
     int indexEndWindow = ITEMS_WINDOW - 1;

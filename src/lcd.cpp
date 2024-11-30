@@ -1,36 +1,22 @@
 #include <Arduino.h>
-#include <SimpleCLI.h>
-#include "tmcGlobal.h"
-#include <Arduino.h>
-
-#include <string>
-
 #include <TFT_eSPI.h>
 #include <SPI.h>
-#include <TMCStepper.h>
-
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLE2902.h>
-#include <BLEClient.h>
-
 #include <EncButton.h>
-
 #include "TFT_color.h"
 
 #include "global.h"
 
 #include "menuTypedef.h"
 
+#include "./screen/createMenu.h"
+
 #include "Roboto_Medium_en_ru_18.h"
 #include "Roboto_Medium_en_ru_20.h"
 #include "Roboto_Medium_en_ru_24.h"
 #include "Roboto_Medium_en_ru_26.h"
 
-#define AA_FONT_SMALL _acRoboto_Medium_en_ru_24
+#define AA_FONT_SMALL _acRoboto_Medium_en_ru_20
 
-SemaphoreHandle_t semaphore; // Дескриптор семафора
 
 extern EncButton eb;
 
@@ -44,27 +30,17 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 
 // uint16 color = ((red>>3)<<11) | ((green>>2)<<5) | (blue>>3);
 
-bool updateLcd = true;
-
+static bool updateLcd = true;
 TaskHandle_t TaskLcd;
+enum CurrenScreen currentScreen = MAIN;
+
 
 [[noreturn]] void TaskLcdLoop(void *parameter);
 
-//
-screenAction menuConfig;
-screenAction menuMain;
-
-
-
 void Screen(screenAction *menu);
 
-enum CurrenScreen {
-    MAIN,
-    CONFIG,
-} currentScreen = MAIN;
 
-void createMenuConfig();
-void createMenuMain();
+
 
 void lcdInit() {
 
@@ -80,9 +56,6 @@ void lcdInit() {
 }
 
 [[noreturn]] void TaskLcdLoop(void *parameter) {
-
-    //vSemaphoreCreateBinary(semaphore);
-
     tft.init();
     tft.setRotation(3);
     tft.fillScreen(0x1234);
@@ -97,8 +70,6 @@ void lcdInit() {
     screenAction *s;
 
     while (true) {
-
-        // xSemaphoreTake(semaphore, portMAX_DELAY);
         switch (currentScreen) {
             case MAIN:
                 s = &menuMain;
@@ -127,7 +98,7 @@ void Text(const String& text, int16_t x = 0, int16_t y = 0, uint16_t colorText =
 void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int16_t y) {
 
     if (item->type == itemAction::SWITCH) {
-        Serial2.println("item->type == itemAction::SWITCH");
+        //Serial2.println("item->type == itemAction::SWITCH");
 
         if ((line == index) && (eb.press())) {
             uint16_t a = item->value->get();
@@ -137,8 +108,8 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
 
         auto s0 = (item->value->get()) ? &item->textOn : &item->textOff;
 
-        Timber.i( item->textOn);
-        Timber.i(item->textOff);
+        //Timber.i( item->textOn);
+        //Timber.i(item->textOff);
         //Timber.i(s0.c_str());
 
         if (line == index)
@@ -150,7 +121,7 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
     }
 
     if ((item->type == itemAction::EDITINT) || (item->type == itemAction::EDITINTMICROSTEP)) {
-        Serial2.println("item->type == itemAction::EDITINT EDITINTMICROSTEP");
+        //Serial2.println("item->type == itemAction::EDITINT EDITINTMICROSTEP");
         auto a = *isSelect;
 
         if (line == index) {
@@ -162,7 +133,6 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
 
             if (a) {
 
-                // Микрошаг
                 if (item->type == itemAction::EDITINT) {
                     if (eb.right()) {
                         uint16_t t = item->value->get() + item->step;
@@ -198,7 +168,7 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
             }
         }
 
-        String str11 = String(item->text) + item->value->get();
+        String str11 = String(item->text) + item->value->get() + item->testSuffix;
 
         if (line == index) {
 
@@ -214,7 +184,7 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
     }
 
     if (item->type == itemAction::TEXT) {
-        Serial2.println("item->type == itemAction::TEXT");
+        //Serial2.println("item->type == itemAction::TEXT");
         String str11 = String(item->text);
         if (line == index) {
             Text(str11, x, y, item->colorActive, item->colorBg);
@@ -225,7 +195,7 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
 
     if (item->type == itemAction::BUTTON) {
 
-        Serial2.printf("item->type == itemAction::BUTTON line:%d index:%d\n", line, index);
+        //Serial2.printf("item->type == itemAction::BUTTON line:%d index:%d\n", line, index);
 
         if (line == index)
             Text(item->text, x, y, item->colorActive, item->colorBg);
@@ -234,7 +204,7 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
 
         if ((line == index) && eb.press()) {
             eb.clear();
-            Serial2.printf("item->type == itemAction::BUTTON press() line:%d index:%d\n", line, index);
+            //Serial2.printf("item->type == itemAction::BUTTON press() line:%d index:%d\n", line, index);
             item->executeCallback(0);
         }
         return;
@@ -310,125 +280,25 @@ void Screen(screenAction *screen) {
         tft.setTextColor(White, colorBg);
         // tft.drawString(">", 2, line * height);
 
-        int ii = 0;
+        int16_t ii = 0;
 
         for (int i = screen->indexStartWindow; i <= screen->indexEndWindow; i++) {
             screen->items[i].colorActive = screen->colorActive;
             screen->items[i].colorInactive = screen->colorInactive;
             screen->items[i].colorBg = screen->colorBg;
-            ITEM(screen->line, i, &screen->items[i], &screen->isSelect, screen->startX, ii * screen->height + screen->startY);
+            ITEM(screen->line, i, &screen->items[i], &screen->isSelect, screen->startX, (int16_t)(ii * screen->height + screen->startY));
             ii++;
         }
-        tft.fillRect(sbX, sbY, sbW, (int) sbMaxHeight, sbColorBg);
-        int a = (int)((float) screen->indexStartWindow / (float) screen->ITEMS_COUNT * sbMaxHeight);
-        tft.fillRect(sbX + 1, sbY + a, sbW - 2, (int32_t)sbActiveHeight, sbColor);
+
+        if(screen->ITEMS_COUNT > screen->ITEMS_WINDOW) {
+            tft.fillRect(sbX, sbY, sbW, (int) sbMaxHeight, sbColorBg);
+            int a = (int) ((float) screen->indexStartWindow / (float) screen->ITEMS_COUNT * sbMaxHeight);
+            tft.fillRect(sbX + 1, sbY + a, sbW - 2, (int32_t) sbActiveHeight, sbColor);
+        }
     }
 
     delay(5);
 }
 
-//Создание списка отображения
-void createMenuMain() {
-    itemAction actions;
 
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverEnable;
-    actions.textOn = (char*)"Мотор: Вкл";
-    actions.textOff = (char*)"Мотор: Выкл";
-    menuMain.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "Настройка";
-    actions.callback = [](int data) {
-        Serial2.println("Нажата кнопка: Настройка");
-        currentScreen = CONFIG;
-        update();
-    };
-    menuMain.addMenuAction(actions);
-    actions.callback = nullptr;
-    //////////////////////////////////
-
-    //////////////////////////////////
-    menuMain.ITEMS_COUNT = menuMain.items.size();
-    menuMain.ITEMS_WINDOW = 5;
-    menuMain.indexEndWindow = menuMain.ITEMS_WINDOW - 1;
-}
-//Создание списка настройки
-void createMenuConfig() {
-
-    itemAction actions;
-
-    ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "<- Назад";
-    actions.callback = [](int data) {
-        Serial2.println("Нажата кнопка: Назад");
-        currentScreen = MAIN;
-        update();
-    };
-    menuConfig.addMenuAction(actions);
-    actions.callback = nullptr;
-    ///////////////////////////////////
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverEnable;
-    actions.textOn = (char*)"Мотор: Вкл";
-    actions.textOff = (char*)"Мотор: Выкл";
-    actions.skipping = false;
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverChop;
-    actions.textOn = (char*)"Режим: StealthChop";
-    actions.textOff = (char*)"Режим: SpreadCycle";
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::EDITINT;
-    actions.value = &tmcDriverCurrent;
-    actions.text = "Ток: ";
-    actions.min = 100;
-    actions.max = 3100;
-    actions.step = 100;
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::EDITINTMICROSTEP;
-    actions.value = &tmcDriverMicrostep;
-    actions.text = "Микрошаг: ";
-    actions.min = 1;
-    actions.max = 256;
-    actions.step = 1;
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverInterpolation;
-    actions.textOn = (char*)"Interpolation: Вкл";
-    actions.textOff = (char*)"Interpolation: Выкл";
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::TEXT;
-    actions.text = "Текст0";
-    actions.skipping = true;
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::TEXT;
-    actions.text = "Текст1";
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "Button";
-    // Устанавливаем лямбду как коллбек
-    actions.callback = [](int data) {
-        Serial2.println("Нажата кнопка");
-    };
-    menuConfig.addMenuAction(actions);
-    actions.callback = nullptr;
-    ///////////////////////////////////
-    actions.type = itemAction::TEXT;
-    actions.text = "Текст2";
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    menuConfig.ITEMS_COUNT = menuConfig.items.size();
-    menuConfig.ITEMS_WINDOW = 5;
-    menuConfig.indexEndWindow = menuConfig.ITEMS_WINDOW - 1;
-
-}
 

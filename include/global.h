@@ -10,6 +10,7 @@
 extern timber Timber;
 
 extern void observer();
+extern void update();
 
 extern State<uint16_t> tmcDriverEnable;
 extern State<uint16_t> tmcDriverChop;
