@@ -7,7 +7,7 @@ extern void update();
 
 SimpleCLI cli;
 
-// Список команд
+//Список команд
 //Command cmdReset;  // Перезагрузка reset
 //Command cmdEnable; // Включение отключение драйвера >>enable [on/off]
 //Command cmdReadGCONF;

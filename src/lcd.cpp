@@ -39,9 +39,6 @@ enum CurrenScreen currentScreen = MAIN;
 
 void Screen(screenAction *menu);
 
-
-
-
 void lcdInit() {
 
     xTaskCreatePinnedToCore(
@@ -94,7 +91,7 @@ void update() {
     updateLcd = true;
 }
 
-void Text(const String& text, int16_t x = 0, int16_t y = 0, uint16_t colorText = 0, uint16_t colorBg = 0xFFFF, bool bgfill = false) {
+void Text(const String& text, const int16_t x = 0, const int16_t y = 0, uint16_t colorText = 0, uint16_t colorBg = 0xFFFF, bool bgfill = false) {
     tft.setTextColor(colorText, colorBg, bgfill);
     tft.setCursor(x, y);
     tft.println(text);

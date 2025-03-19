@@ -21,7 +21,7 @@ void report0(){
     memset(buf20, 0, sizeof(buf20));
 
     buf20[0] = 'R';
-    buf20[2] = tmcDriverEnable.get() | (tmcDriverChop.get()<<1);
+    buf20[2] = tmcDriverEnable.get() | tmcDriverChop.get()<<1;
     
 
 }

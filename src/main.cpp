@@ -13,20 +13,21 @@
 #include "global.h"
 
 #include <EncButton.h>
+#include <ble/ble.h>
+
 
 extern EncButton eb;
-
 
 extern void lcdInit();
 
 extern void encoderInit();
 
+extern void TaskWifiLoop();
+
+//Ble ble;
+
 #define DIAG0 35
 #define DIAG1 34
-
-extern void BLE_init();
-
-extern void BLE_tick();
 
 bool shaft = false;
 
@@ -75,14 +76,21 @@ void setup() {
     pinMode(SW_MISO, INPUT);
     pinMode(SW_SCK, INPUT);
 
-
     pinMode(DIAG0, INPUT);
     pinMode(DIAG1, INPUT);
 
     Serial.begin(921600);
     Serial2.begin(2000000);
-    Serial2.printf("trtrtertert");
 
+    Timber::clear();
+    timber.i("--------------------------------");
+    timber.i("Контроллер шагового мотора V1.0");
+    timber.w("Ворнинг");
+    timber.e("Ошибка");
+    timber.colorStringln(15, 36, "Проверка 15 36");
+    timber.i("--------------------------------");
+
+    timber.s("Текст");
 
     pinMode(EN_PIN, OUTPUT);
     pinMode(STEP_PIN, OUTPUT);
@@ -124,12 +132,14 @@ void setup() {
     Serial2.println(driver.toff());
 
 
-    BLE_init();
+    //ble.init();
 
     stepper.setMaxSpeed(1000000);
     tmcStepperMaxSpeed.set(4000);
     tmcStepperSetTarget.set(50);
     //stepper.setAcceleration(2000); // ускорение
+
+    TaskWifiLoop();
 
 }
 

@@ -12,18 +12,18 @@
 #define COLOR_RESET   "\33[0m"
 
 
-class timber {
+class Timber {
 public:
 
-    void clear() { print("\33[1m\n"); }   //Очистка терминала
+    static void clear() { print("\33[1m\n"); }   //Очистка терминала
     //void color(int color = 15);                //Задать цвет текста
     //void bgcolor(int color = 0);               //Задать цвет фона
 
-    void reset() { print("\33[0m"); };
+    static void reset() { print("\33[0m"); };
 
-    void resetln() { print("\33[0m\n"); };
+    static void resetln() { print("\33[0m\n"); };
 
-    void print(char const *format) {
+    static void print(char const *format) {
         Serial2.write((uint8_t *) format, strlen(format));
         //HAL_UART_Transmit(huart, ( uint8_t*) format, strlen(format), 1000);
     }

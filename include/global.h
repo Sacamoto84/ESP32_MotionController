@@ -16,7 +16,7 @@ enum class WorkMode {
 };
 
 extern WorkMode currentMode;
-extern timber Timber;
+extern Timber timber;
 
 
 extern void observer();
