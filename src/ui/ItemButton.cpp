@@ -1,0 +1,16 @@
+#include "ui.h"
+
+void ItemButton(int line, int index, itemAction *item, bool *isSelect, int16_t x, int16_t y){
+
+    if (line == index)
+        Text(item->text, x, y, item->colorActive, item->colorBg);
+    else
+        Text(item->text, x, y, item->colorInactive, item->colorBg);
+
+    if ((line == index) && eb.press()) {
+        eb.clear();
+        //Serial2.printf("item->type == itemAction::BUTTON press() line:%d index:%d\n", line, index);
+        item->executeCallback(0);
+    }
+
+  }

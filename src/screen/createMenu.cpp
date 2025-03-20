@@ -1,10 +1,5 @@
-//
-// Created by user on 30.11.2024.
-//
-
 #include "createMenu.h"
 
-//
 screenAction menuConfig;
 screenAction menuContinuous;
 screenAction menuVibro;
@@ -163,21 +158,21 @@ void createMenuVibro()
 
     actions.type = itemAction::TEXT;
     actions.text = (char*)"Режим: Вибро";
-    menuContinuous.addMenuAction(actions);
+    menuVibro.addMenuAction(actions);
 
     actions.type = itemAction::SWITCH;
     actions.value = &tmcDriverEnable;
     actions.textOn = (char*)"Мотор: Вкл";
     actions.textOff = (char*)"Мотор: Выкл";
-    menuContinuous.addMenuAction(actions);
+    menuVibro.addMenuAction(actions);
 
     actions.type = itemAction::TEXT;
     actions.text = (char*)"Направление: ->";
-    menuContinuous.addMenuAction(actions);
+    menuVibro.addMenuAction(actions);
 
     actions.type = itemAction::TEXT;
     actions.text = (char*)"Скорость: 20 имп/c";
-    menuContinuous.addMenuAction(actions);
+    menuVibro.addMenuAction(actions);
 
     ///////////////////////////////////
     actions.type = itemAction::BUTTON;
@@ -188,7 +183,7 @@ void createMenuVibro()
         currentScreen = CONFIG;
         update();
     };
-    menuContinuous.addMenuAction(actions);
+    menuVibro.addMenuAction(actions);
     actions.callback = nullptr;
     //////////////////////////////////
 
@@ -198,11 +193,11 @@ void createMenuVibro()
     {
         esp_restart();
     };
-    menuContinuous.addMenuAction(actions);
+    menuVibro.addMenuAction(actions);
     actions.callback = nullptr;
 
     //////////////////////////////////
-    menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
-    menuContinuous.ITEMS_WINDOW = 6;
-    menuContinuous.indexEndWindow = menuContinuous.ITEMS_WINDOW - 1;
+    menuVibro.ITEMS_COUNT = menuVibro.items.size();
+    menuVibro.ITEMS_WINDOW = 6;
+    menuVibro.indexEndWindow = menuVibro.ITEMS_WINDOW - 1;
 }

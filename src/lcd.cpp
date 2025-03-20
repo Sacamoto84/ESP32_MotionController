@@ -6,7 +6,7 @@
 
 #include "global.h"
 
-#include "menuTypedef.h"
+#include "screen/menuTypedef.h"
 
 #include "./screen/createMenu.h"
 
@@ -65,7 +65,7 @@ void lcdInit() {
     createMenuConfig();
     createMenuVibro();
 
-    screenAction *s;
+    screenAction *s = &menuContinuous;
 
     while (true) {
         switch (currentScreen) {
@@ -91,190 +91,8 @@ void update() {
     updateLcd = true;
 }
 
-void Text(const String& text, const int16_t x = 0, const int16_t y = 0, uint16_t colorText = 0, uint16_t colorBg = 0xFFFF, bool bgfill = false) {
-    tft.setTextColor(colorText, colorBg, bgfill);
-    tft.setCursor(x, y);
-    tft.println(text);
-}
-
-void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int16_t y) {
-
-    if (item->type == itemAction::SWITCH) {
-        //Serial2.println("item->type == itemAction::SWITCH");
-
-        if ((line == index) && (eb.press())) {
-            uint16_t a = item->value->get();
-            a = !a;
-            item->value->set(a);
-        }
-
-        auto s0 = (item->value->get()) ? &item->textOn : &item->textOff;
-
-        //Timber.i( item->textOn);
-        //Timber.i(item->textOff);
-        //Timber.i(s0.c_str());
-
-        if (line == index)
-            Text(*s0, x, y, item->colorActive, item->colorBg);
-        else
-            Text(*s0, x, y, item->colorInactive, item->colorBg);
-
-        return;
-    }
-
-    if ((item->type == itemAction::EDITINT) || (item->type == itemAction::EDITINTMICROSTEP)) {
-        //Serial2.println("item->type == itemAction::EDITINT EDITINTMICROSTEP");
-        auto a = *isSelect;
-
-        if (line == index) {
-
-            if (eb.press()) {
-                a = !a;
-                *isSelect = a;
-            }
-
-            if (a) {
-
-                if (item->type == itemAction::EDITINT) {
-                    if (eb.right()) {
-                        uint16_t t = item->value->get() + item->step;
-                        if (t >= item->max)
-                            t = item->max;
-                        item->value->set(t);
-                    }
-                    if (eb.left()) {
-                        uint16_t t = item->value->get() - item->step;
-                        if (t <= item->min)
-                            t = item->min;
-                        item->value->set(t);
-                    }
 
 
-                }
-
-                if (item->type == itemAction::EDITINTMICROSTEP) {
-                    if (eb.right()) {
-                        uint16_t t = item->value->get() * 2;
-                        if (t >= item->max)
-                            t = item->max;
-                        item->value->set(t);
-                    }
-                    if (eb.left()) {
-                        uint16_t t = item->value->get() / 2;
-                        if (t <= item->min)
-                            t = item->min;
-                        item->value->set(t);
-                    }
-                }
-
-            }
-        }
-
-        String str11 = String(item->text) + item->value->get() + item->testSuffix;
-
-        if (line == index) {
-
-            if (!a)
-                Text(str11, x, y, item->colorActive, item->colorBg);
-            else
-                Text(str11, x, y, item->colorBg, item->colorActive, true);
-
-        } else
-            Text(str11, x, y, item->colorInactive, item->colorBg);
-
-        return;
-    }
-
-
-
-
-    if (item->type == itemAction::EDITINT_I32) {
-        //Serial2.println("item->type == itemAction::EDITINT EDITINTMICROSTEP");
-        auto a = *isSelect;
-
-        if (line == index) {
-
-            if (eb.press()) {
-                a = !a;
-                *isSelect = a;
-            }
-
-            if (a) {
-
-                    if (eb.right()) {
-                        int32_t t = item->value_i32->get() + item->step;
-                        if (t >= item->max)
-                            t = item->max;
-                        item->value_i32->set(t);
-                    }
-                    if (eb.left()) {
-                        int32_t t = item->value_i32->get() - item->step;
-                        if (t <= item->min)
-                            t = item->min;
-                        item->value_i32->set(t);
-                    }
-
-            }
-        }
-
-        String str11 = String(item->text) + item->value_i32->get() + item->testSuffix;
-
-        if (line == index) {
-
-            if (!a)
-                Text(str11, x, y, item->colorActive, item->colorBg);
-            else
-                Text(str11, x, y, item->colorBg, item->colorActive, true);
-
-        } else
-            Text(str11, x, y, item->colorInactive, item->colorBg);
-
-        return;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if (item->type == itemAction::TEXT) {
-        //Serial2.println("item->type == itemAction::TEXT");
-        String str11 = String(item->text);
-        if (line == index) {
-            Text(str11, x, y, item->colorActive, item->colorBg);
-        } else
-            Text(str11, x, y, item->colorInactive, item->colorBg);
-        return;
-    }
-
-    if (item->type == itemAction::BUTTON) {
-
-        //Serial2.printf("item->type == itemAction::BUTTON line:%d index:%d\n", line, index);
-
-        if (line == index)
-            Text(item->text, x, y, item->colorActive, item->colorBg);
-        else
-            Text(item->text, x, y, item->colorInactive, item->colorBg);
-
-        if ((line == index) && eb.press()) {
-            eb.clear();
-            //Serial2.printf("item->type == itemAction::BUTTON press() line:%d index:%d\n", line, index);
-            item->executeCallback(0);
-        }
-        return;
-    }
-
-
-}
 
 void Screen(screenAction *screen) {
 

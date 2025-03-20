@@ -15,6 +15,7 @@
 #include <EncButton.h>
 #include <ble/ble.h>
 
+#include <ESPAsyncWebServer.h>
 
 extern EncButton eb;
 
@@ -22,7 +23,9 @@ extern void lcdInit();
 
 extern void encoderInit();
 
-extern void TaskWifiLoop();
+extern void wifi_loop();
+
+extern AsyncWebSocket ws;
 
 //Ble ble;
 
@@ -31,10 +34,10 @@ extern void TaskWifiLoop();
 
 bool shaft = false;
 
-// // esp8266/esp32
-IRAM_ATTR void isr() {
-    eb.tickISR();
-}
+//esp8266/esp32
+// IRAM_ATTR void isr() {
+//     eb.tickISR();
+// }
 
 #define FREQUENCY 100000 // Частота меандра в Гц (1 кГц)
 
@@ -139,7 +142,8 @@ void setup() {
     tmcStepperSetTarget.set(50);
     //stepper.setAcceleration(2000); // ускорение
 
-    TaskWifiLoop();
+    //TaskWifiLoop();
+    //wifi_loop();
 
 }
 
@@ -147,6 +151,7 @@ bool dir = 1;
 
 void loop() {
 
+    //ws.cleanupClients();
     // здесь происходит движение моторов, вызывать как можно чаще
 
     //Режим постоянный
