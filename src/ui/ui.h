@@ -25,7 +25,6 @@ struct itemAction
         NONE, // Элемент не используется
         SWITCH, // Действие SWITCH
         EDITINT, // Действие EDITINT
-        EDITINT_I32, // Действие EDITINT
         EDITINTMICROSTEP,
         TEXT,
         BUTTON
@@ -72,5 +71,7 @@ extern void Text(const String& text, const int16_t x = 0, const int16_t y = 0, u
 extern void ItemSwitch(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
 extern void ItemText(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
 extern void ItemButton(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
+extern void ItemEDITINT(int line, int index, itemAction *item, bool *isSelect, int16_t x, int16_t y);
+extern void ItemMICROSTEP(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
 
 #endif //UI_H

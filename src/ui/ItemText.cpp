@@ -6,4 +6,5 @@ void ItemText(int line, int index, itemAction *item, bool *isSelect, int16_t x, 
         Text(str, x, y, item->colorActive, item->colorBg);
     } else
         Text(str, x, y, item->colorInactive, item->colorBg);
+
   }

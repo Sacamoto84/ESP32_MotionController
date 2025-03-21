@@ -11,19 +11,7 @@ void createMenuContinuous()
     addMenuElementSwitch(&menuContinuous, "Мотор: Вкл", "Мотор: Выкл", &tmcDriverEnable);
     addMenuElementText(&menuContinuous, "Направление: ->");
     addMenuElementEDITINT(&menuContinuous, "Скорость: ", "", &tmcStepperMaxSpeed,0, 100000, 250);
-
-    itemAction actions;
-
-    actions.type = itemAction::EDITINT_I32;
-    actions.text = (char*)"Амплитуда: ";
-    actions.testSuffix = (char*)"";
-    actions.value = nullptr;
-    actions.value = &tmcStepperSetTarget;
-    actions.min = 0;
-    actions.max = 1000000;
-    actions.step = 100;
-    menuContinuous.addMenuAction(actions);
-    actions.value = nullptr;
+    addMenuElementEDITINT(&menuContinuous, "Амплитуда: ", "", &tmcStepperSetTarget,0, 1000000, 100);
     ///////////////////////////////////
     addMenuElementButton(&menuContinuous, "Настройка",[](int){
         Serial2.println("Нажата кнопка: Настройка");
@@ -43,22 +31,12 @@ void createMenuConfig()
 {
     itemAction actions;
 
-    ///////////////////////////////////
+
     addMenuElementButton(&menuConfig, "<- Назад",[](int){
         Serial2.println("<- Назад"); currentScreen = MAIN; update(); });
-    ///////////////////////////////////
     addMenuElementSwitch(&menuConfig, "Мотор: Вкл", "Мотор: Выкл", &tmcDriverEnable);
-    ///////////////////////////////////
     addMenuElementSwitch(&menuConfig, "Режим: StealthChop", "Режим: SpreadCycle", &tmcDriverChop);
-    ///////////////////////////////////
-    actions.type = itemAction::EDITINT;
-    actions.value = &tmcDriverCurrent;
-    actions.text = "Ток: ";
-    actions.testSuffix = (char*)" мА";
-    actions.min = 100;
-    actions.max = 3100;
-    actions.step = 100;
-    menuConfig.addMenuAction(actions);
+    addMenuElementEDITINT(&menuConfig, "Ток: ", " мА", &tmcStepperMaxSpeed,100, 3100, 100);
     ///////////////////////////////////
     actions.type = itemAction::EDITINTMICROSTEP;
     actions.value = &tmcDriverMicrostep;

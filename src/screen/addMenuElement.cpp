@@ -41,3 +41,4 @@ void addMenuElementButton(screenAction* menu, const char* text, CallbackType cal
     menu->addMenuAction(actions);
     actions.callback = nullptr;
 }
+
