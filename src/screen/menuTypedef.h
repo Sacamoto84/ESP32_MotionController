@@ -2,12 +2,8 @@
 #define ESP32_MOTIONCONTROL_MENUTYPEDEF_H
 
 #include <Arduino.h>
-#include <string>
 #include <vector> // Для std::vector
-#include <functional>
-#include "state.h"
 #include "TFT_color.h"
-
 #include "../ui/ui.h"
 
 struct screenAction {

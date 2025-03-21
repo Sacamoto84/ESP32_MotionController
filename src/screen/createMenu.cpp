@@ -4,49 +4,6 @@ screenAction menuConfig;
 screenAction menuContinuous;
 screenAction menuVibro;
 
-
-void addMenuElementText(screenAction* menu, const char* text)
-{
-    itemAction actions;
-    actions.type = itemAction::TEXT;
-    actions.text = text;
-    menu->addMenuAction(actions);
-}
-
-void addMenuElementSwitch(screenAction* menu, const char* textOn, const char* textOff, State<int32_t>* value)
-{
-    itemAction actions;
-    actions.type = itemAction::SWITCH;
-    actions.value = value;
-    actions.textOn = textOn;
-    actions.textOff = textOff;
-    menu->addMenuAction(actions);
-}
-
-void addMenuElementEDITINT(screenAction* menu, const char* text, const char* textSuffix, State<int32_t>* value,
-                           int32_t min, int32_t max, int32_t step)
-{
-    itemAction actions;
-    actions.type = itemAction::EDITINT;
-    actions.text = text;
-    actions.testSuffix = textSuffix;
-    actions.value = value;
-    actions.min = min;
-    actions.max = max;
-    actions.step = step;
-    menu->addMenuAction(actions);
-}
-
-void addMenuElementButton(screenAction* menu, const char* text, CallbackType callback)
-{
-    itemAction actions;
-    actions.type = itemAction::BUTTON;
-    actions.text = text;
-    actions.callback = callback;
-    menu->addMenuAction(actions);
-    actions.callback = nullptr;
-}
-
 //Создание списка отображения
 void createMenuContinuous()
 {
@@ -87,29 +44,12 @@ void createMenuConfig()
     itemAction actions;
 
     ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "<- Назад";
-    actions.callback = [](int data)
-    {
-        Serial2.println("Нажата кнопка: Назад");
-        currentScreen = MAIN;
-        update();
-    };
-    menuConfig.addMenuAction(actions);
-    actions.callback = nullptr;
+    addMenuElementButton(&menuConfig, "<- Назад",[](int){
+        Serial2.println("<- Назад"); currentScreen = MAIN; update(); });
     ///////////////////////////////////
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverEnable;
-    actions.textOn = (char*)"Мотор: Вкл";
-    actions.textOff = (char*)"Мотор: Выкл";
-    actions.skipping = false;
-    menuConfig.addMenuAction(actions);
+    addMenuElementSwitch(&menuConfig, "Мотор: Вкл", "Мотор: Выкл", &tmcDriverEnable);
     ///////////////////////////////////
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverChop;
-    actions.textOn = (char*)"Режим: StealthChop";
-    actions.textOff = (char*)"Режим: SpreadCycle";
-    menuConfig.addMenuAction(actions);
+    addMenuElementSwitch(&menuConfig, "Режим: StealthChop", "Режим: SpreadCycle", &tmcDriverChop);
     ///////////////////////////////////
     actions.type = itemAction::EDITINT;
     actions.value = &tmcDriverCurrent;
@@ -129,11 +69,7 @@ void createMenuConfig()
     actions.step = 1;
     menuConfig.addMenuAction(actions);
     ///////////////////////////////////
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverInterpolation;
-    actions.textOn = (char*)"Interpolation: Вкл";
-    actions.textOff = (char*)"Interpolation: Выкл";
-    menuConfig.addMenuAction(actions);
+    addMenuElementSwitch(&menuConfig, "Interpolation: Вкл", "Interpolation: Выкл", &tmcDriverInterpolation);
     ///////////////////////////////////
     actions.type = itemAction::TEXT;
     actions.text = "Текст0";
@@ -143,16 +79,6 @@ void createMenuConfig()
     actions.type = itemAction::TEXT;
     actions.text = "Текст1";
     menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "Button";
-    // Устанавливаем лямбду как коллбек
-    actions.callback = [](int data)
-    {
-        Serial2.println("Нажата кнопка");
-    };
-    menuConfig.addMenuAction(actions);
-    actions.callback = nullptr;
     ///////////////////////////////////
     actions.type = itemAction::TEXT;
     actions.text = "Текст2";
