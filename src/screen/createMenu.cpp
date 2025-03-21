@@ -4,66 +4,77 @@ screenAction menuConfig;
 screenAction menuContinuous;
 screenAction menuVibro;
 
+
+void addMenuElementText(screenAction* menu, const char* text)
+{
+    itemAction actions;
+    actions.type = itemAction::TEXT;
+    actions.text = text;
+    menu->addMenuAction(actions);
+}
+
+void addMenuElementSwitch(screenAction* menu, const char* textOn, const char* textOff, State<int32_t>* value)
+{
+    itemAction actions;
+    actions.type = itemAction::SWITCH;
+    actions.value = value;
+    actions.textOn = textOn;
+    actions.textOff = textOff;
+    menu->addMenuAction(actions);
+}
+
+void addMenuElementEDITINT(screenAction* menu, const char* text, const char* textSuffix, State<int32_t>* value,
+                           int32_t min, int32_t max, int32_t step)
+{
+    itemAction actions;
+    actions.type = itemAction::EDITINT;
+    actions.text = text;
+    actions.testSuffix = textSuffix;
+    actions.value = value;
+    actions.min = min;
+    actions.max = max;
+    actions.step = step;
+    menu->addMenuAction(actions);
+}
+
+void addMenuElementButton(screenAction* menu, const char* text, CallbackType callback)
+{
+    itemAction actions;
+    actions.type = itemAction::BUTTON;
+    actions.text = text;
+    actions.callback = callback;
+    menu->addMenuAction(actions);
+    actions.callback = nullptr;
+}
+
 //Создание списка отображения
 void createMenuContinuous()
 {
+    addMenuElementText(&menuContinuous, "Режим: Постоянный");
+    addMenuElementSwitch(&menuContinuous, "Мотор: Вкл", "Мотор: Выкл", &tmcDriverEnable);
+    addMenuElementText(&menuContinuous, "Направление: ->");
+    addMenuElementEDITINT(&menuContinuous, "Скорость: ", "", &tmcStepperMaxSpeed,0, 100000, 250);
+
     itemAction actions;
-
-    actions.type = itemAction::TEXT;
-    actions.text = (char*)"Режим: Постоянный";
-    menuContinuous.addMenuAction(actions);
-
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcDriverEnable;
-    actions.textOn = (char*)"Мотор: Вкл";
-    actions.textOff = (char*)"Мотор: Выкл";
-    menuContinuous.addMenuAction(actions);
-
-    actions.type = itemAction::TEXT;
-    actions.text = (char*)"Направление: ->";
-    menuContinuous.addMenuAction(actions);
-
-    actions.type = itemAction::EDITINT;
-    actions.text = (char*)"Скорость: ";
-    actions.testSuffix = (char*)"";
-    actions.value = &tmcStepperMaxSpeed;
-    actions.min = 0;
-    actions.max = 100000;
-    actions.step = 250;
-    menuContinuous.addMenuAction(actions);
 
     actions.type = itemAction::EDITINT_I32;
     actions.text = (char*)"Амплитуда: ";
     actions.testSuffix = (char*)"";
     actions.value = nullptr;
-    actions.value_i32 = &tmcStepperSetTarget;
+    actions.value = &tmcStepperSetTarget;
     actions.min = 0;
     actions.max = 1000000;
     actions.step = 100;
     menuContinuous.addMenuAction(actions);
-    actions.value_i32 = nullptr;
+    actions.value = nullptr;
     ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "Настройка";
-    actions.callback = [](int data)
-    {
+    addMenuElementButton(&menuContinuous, "Настройка",[](int){
         Serial2.println("Нажата кнопка: Настройка");
         currentScreen = CONFIG;
         update();
-    };
-    menuContinuous.addMenuAction(actions);
-    actions.callback = nullptr;
+    });
     //////////////////////////////////
-
-    actions.type = itemAction::BUTTON;
-    actions.text = "Перезагрузка";
-    actions.callback = [](int)
-    {
-        esp_restart();
-    };
-    menuContinuous.addMenuAction(actions);
-    actions.callback = nullptr;
-
+    addMenuElementButton(&menuContinuous, "Перезагрузка",[](int){ esp_restart(); });
     //////////////////////////////////
     menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
     menuContinuous.ITEMS_WINDOW = 6;

@@ -9,7 +9,6 @@ void ItemButton(int line, int index, itemAction *item, bool *isSelect, int16_t x
 
     if ((line == index) && eb.press()) {
         eb.clear();
-        //Serial2.printf("item->type == itemAction::BUTTON press() line:%d index:%d\n", line, index);
         item->executeCallback(0);
     }
 

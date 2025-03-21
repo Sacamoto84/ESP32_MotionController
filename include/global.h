@@ -22,13 +22,13 @@ extern Timber timber;
 extern void observer();
 extern void update();
 
-extern State<uint16_t> tmcDriverEnable;
-extern State<uint16_t> tmcDriverChop;
-extern State<uint16_t> tmcDriverCurrent;
-extern State<uint16_t> tmcDriverMicrostep; //Микрошаг
-extern State<uint16_t> tmcDriverInterpolation;
+extern State<int32_t> tmcDriverEnable;
+extern State<int32_t> tmcDriverChop;
+extern State<int32_t> tmcDriverCurrent;
+extern State<int32_t> tmcDriverMicrostep; //Микрошаг
+extern State<int32_t> tmcDriverInterpolation;
 
-extern State<uint16_t> tmcStepperMaxSpeed;
+extern State<int32_t> tmcStepperMaxSpeed;
 extern State<int32_t> tmcStepperSetTarget;   // цель
 
 #endif // ends #ifndef _TFT_eSPIH_

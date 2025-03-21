@@ -75,22 +75,22 @@ void ITEM(int line, int index, itemAction *item, bool *isSelect, int16_t x, int1
             if (a) {
 
                     if (eb.right()) {
-                        int32_t t = item->value_i32->get() + item->step;
+                        int32_t t = item->value->get() + item->step;
                         if (t >= item->max)
                             t = item->max;
-                        item->value_i32->set(t);
+                        item->value->set(t);
                     }
                     if (eb.left()) {
-                        int32_t t = item->value_i32->get() - item->step;
+                        int32_t t = item->value->get() - item->step;
                         if (t <= item->min)
                             t = item->min;
-                        item->value_i32->set(t);
+                        item->value->set(t);
                     }
 
             }
         }
 
-        String str11 = String(item->text) + item->value_i32->get() + item->testSuffix;
+        String str11 = String(item->text) + item->value->get() + item->testSuffix;
 
         if (line == index) {
 
