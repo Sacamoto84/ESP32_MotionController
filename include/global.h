@@ -7,6 +7,11 @@
 #include "tmcGlobal.h"
 #include "Timber.h"
 #include "GyverStepper2.h"
+#include <GyverDB.h>
+#include <LittleFS.h>
+#include <GyverDBFile.h>
+
+extern GyverDBFile db;
 
 extern GStepper2<STEPPER2WIRE> stepper;
 

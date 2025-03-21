@@ -34,6 +34,18 @@ extern AsyncWebSocket ws;
 
 bool shaft = false;
 
+// имена ячеек базы данных
+DB_KEYS(kk,
+    _tmcDriverEnable,
+    _tmcDriverChop,
+    _tmcDriverCurrent,
+    _tmcDriverMicrostep,
+    _tmcDriverInterpolation,
+    _tmcStepperMaxSpeed,
+    _tmcStepperSetTarget
+);
+
+
 //esp8266/esp32
 // IRAM_ATTR void isr() {
 //     eb.tickISR();
@@ -60,6 +72,40 @@ void IRAM_ATTR onTimer() {
 
 void setup() {
 
+    Serial.begin(921600);
+    Serial2.begin(2000000);
+
+    Timber::clear();
+    timber.i("--------------------------------");
+    timber.i("Контроллер шагового мотора V1.0");
+    timber.w("Ворнинг");
+    timber.e("Ошибка");
+    timber.colorStringln(15, 36, "Проверка 15 36");
+    timber.i("--------------------------------");
+
+    LittleFS.begin(true);
+    // запуск и инициализация полей БД
+    db.begin();
+    db.init(kk::_tmcDriverEnable, 0);
+    db.init(kk::_tmcDriverChop, 0);
+    db.init(kk::_tmcDriverCurrent, 1000); //Ток двайвера
+    db.init(kk::_tmcDriverMicrostep, 16);  //Микрошаг
+    db.init(kk::_tmcDriverInterpolation, 0);
+    db.init(kk::_tmcDriverChop, 0);
+    db.init(kk::_tmcStepperMaxSpeed, 1000);
+    db.init(kk::_tmcStepperSetTarget, 10);
+
+    observer();
+
+    tmcDriverEnable.set(db.get(kk::_tmcDriverEnable));
+    tmcDriverChop.set(db.get(kk::_tmcDriverChop));
+    tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
+    tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
+    tmcDriverInterpolation.set(db.get(kk::_tmcDriverInterpolation));
+    tmcDriverChop.set(db.get(kk::_tmcDriverChop));
+    tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
+    tmcStepperSetTarget.set(db.get(kk::_tmcStepperSetTarget));
+
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
     timerAttachInterrupt(timer, &onTimer, true);
@@ -67,7 +113,9 @@ void setup() {
     timerAlarmEnable(timer);
 
 
-    observer();
+
+
+
 
     lcdInit();
 
@@ -82,16 +130,7 @@ void setup() {
     pinMode(DIAG0, INPUT);
     pinMode(DIAG1, INPUT);
 
-    Serial.begin(921600);
-    Serial2.begin(2000000);
 
-    Timber::clear();
-    timber.i("--------------------------------");
-    timber.i("Контроллер шагового мотора V1.0");
-    timber.w("Ворнинг");
-    timber.e("Ошибка");
-    timber.colorStringln(15, 36, "Проверка 15 36");
-    timber.i("--------------------------------");
 
     timber.s("Текст");
 
@@ -145,11 +184,16 @@ void setup() {
     //TaskWifiLoop();
     //wifi_loop();
 
+
+
 }
 
 bool dir = 1;
 
 void loop() {
+
+    // тикер, вызывать в лупе
+    db.tick();
 
     //ws.cleanupClients();
     // здесь происходит движение моторов, вызывать как можно чаще

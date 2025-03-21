@@ -1,5 +1,7 @@
 #include "global.h"
 
+GyverDBFile db(&LittleFS, "data.db");
+
 // Текущий режим
 WorkMode currentMode = WorkMode::CONTINUOUS;
 
