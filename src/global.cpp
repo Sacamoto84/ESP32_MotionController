@@ -25,24 +25,18 @@ void observer() {
     tmcStepperSetTarget.addObserver([](int32_t value) {
         Serial2.printf("Observer: tmcStepperSetTarget изменен %d\n", value);
         stepper.setTarget(value);
+        db.set(kk::_tmcStepperSetTarget, value);
     });
 
     tmcStepperMaxSpeed.addObserver([](int32_t value) {
-        Serial2.printf("Observer: tmcStepperMaxSpeed изменен %d\n", value);
+        timber.i("Observer: tmcStepperMaxSpeed изменен %d\n", value);
         stepper.setMaxSpeed(value);
-        //stepper.setSpeed(value);
         db.set(kk::_tmcStepperMaxSpeed, value);
-        // вывод всей БД в Print
-        db.dump(Serial2);
     });
 
     tmcDriverEnable.addObserver([](int32_t value) {
         Serial2.printf("Observer: tmcDriverEnable изменен %d\n", value);
-        if (value)
-            stepper.enable();
-        else
-            stepper.disable();
-
+        if (value) stepper.enable(); else stepper.disable();
         db.set(kk::_tmcDriverEnable, value);
     });
 

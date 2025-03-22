@@ -100,7 +100,7 @@ void setup() {
     db.init(kk::_tmcDriverMicrostep, 16);  //Микрошаг
     db.init(kk::_tmcDriverInterpolation, 0);
     db.init(kk::_tmcDriverChop, 0);
-    db.init(kk::_tmcStepperMaxSpeed, 1000);
+    db.init(kk::_tmcStepperMaxSpeed, 2000);
     db.init(kk::_tmcStepperSetTarget, 10);
 
 
