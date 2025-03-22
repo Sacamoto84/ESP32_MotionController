@@ -1,7 +1,5 @@
 #include "global.h"
 
-GyverDBFile db(&LittleFS, "data.db");
-
 // Текущий режим
 WorkMode currentMode = WorkMode::CONTINUOUS;
 
@@ -20,6 +18,8 @@ GStepper2<STEPPER2WIRE> stepper(200, STEP_PIN, DIR_PIN, EN_PIN);
 
 #define EN_PIN 14 // Enable
 
+extern GyverDBFile db;
+
 void observer() {
 
     tmcStepperSetTarget.addObserver([](int32_t value) {
@@ -27,13 +27,14 @@ void observer() {
         stepper.setTarget(value);
     });
 
-
     tmcStepperMaxSpeed.addObserver([](int32_t value) {
         Serial2.printf("Observer: tmcStepperMaxSpeed изменен %d\n", value);
         stepper.setMaxSpeed(value);
         //stepper.setSpeed(value);
+        db.set(kk::_tmcStepperMaxSpeed, value);
+        // вывод всей БД в Print
+        db.dump(Serial2);
     });
-
 
     tmcDriverEnable.addObserver([](int32_t value) {
         Serial2.printf("Observer: tmcDriverEnable изменен %d\n", value);
@@ -41,18 +42,21 @@ void observer() {
             stepper.enable();
         else
             stepper.disable();
+
+        db.set(kk::_tmcDriverEnable, value);
     });
 
 
     tmcDriverChop.addObserver([](int32_t value) {
         Serial2.println("Observer: tmcDriverChop updated");
-
+        db.set(kk::_tmcDriverChop, value);
     });
 
     //Установка тока
     tmcDriverCurrent.addObserver([](int32_t value) {
         Serial2.printf("Observer: tmcDriverCurrent updated %d\n", value);
         driver.rms_current(value); // Set motor RMS current
+        db.set(kk::_tmcDriverCurrent, value);
     });
 
     //Установка микрошага
@@ -61,9 +65,8 @@ void observer() {
         uint16_t a;
         if (value == 1) a = 0; else a = value;
         driver.microsteps(a);
+        db.set(kk::_tmcDriverMicrostep, value);
     });
-
-
 
 }
 

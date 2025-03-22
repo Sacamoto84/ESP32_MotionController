@@ -12,6 +12,7 @@
 #define COLOR_RESET   "\33[0m"
 
 
+
 class Timber {
 public:
 
@@ -155,5 +156,6 @@ public:
 
 };
 
+extern Timber timber;
 
 #endif /* UTILS_LOGUART_H_ */

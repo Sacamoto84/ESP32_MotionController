@@ -8,10 +8,22 @@
 #include "Timber.h"
 #include "GyverStepper2.h"
 #include <GyverDB.h>
-#include <LittleFS.h>
-#include <GyverDBFile.h>
 
-extern GyverDBFile db;
+#include <LittleFS.h>
+
+#include "GyverDBFile.h"
+
+
+// имена ячеек базы данных
+DB_KEYS(kk,
+    _tmcDriverEnable,
+    _tmcDriverChop,
+    _tmcDriverCurrent,
+    _tmcDriverMicrostep,
+    _tmcDriverInterpolation,
+    _tmcStepperMaxSpeed,
+    _tmcStepperSetTarget
+);
 
 extern GStepper2<STEPPER2WIRE> stepper;
 

@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+#include "FS.h"
+#include "LITTLEFS.h"
+
 #include <TFT_eSPI.h> // Hardware-specific library
 #include <SPI.h>
 #include <TMCStepper.h>
@@ -9,6 +12,8 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 #include <BLEClient.h>
+
+#include <esp_task_wdt.h>
 
 #include "global.h"
 
@@ -34,17 +39,7 @@ extern AsyncWebSocket ws;
 
 bool shaft = false;
 
-// имена ячеек базы данных
-DB_KEYS(kk,
-    _tmcDriverEnable,
-    _tmcDriverChop,
-    _tmcDriverCurrent,
-    _tmcDriverMicrostep,
-    _tmcDriverInterpolation,
-    _tmcStepperMaxSpeed,
-    _tmcStepperSetTarget
-);
-
+GyverDBFile db;
 
 //esp8266/esp32
 // IRAM_ATTR void isr() {
@@ -71,7 +66,7 @@ void IRAM_ATTR onTimer() {
 }
 
 void setup() {
-
+    esp_task_wdt_init(30, false);
     Serial.begin(921600);
     Serial2.begin(2000000);
 
@@ -83,17 +78,32 @@ void setup() {
     timber.colorStringln(15, 36, "Проверка 15 36");
     timber.i("--------------------------------");
 
-    LittleFS.begin(true);
+    if  (!LittleFS.begin(true))
+        timber.e("Ошибка при монтировании LittleFS");
+
+    db.setFS(&LittleFS, "/data.db");
+    //LittleFS.format();
+
     // запуск и инициализация полей БД
-    db.begin();
+    const bool res = db.begin();
+
+    if (!res)
+        timber.e("Ошибка открытия базы");
+
+    else timber.i("База на диске");
+    db.dump(Serial2);
+    timber.i("--------------------------------");
+
     db.init(kk::_tmcDriverEnable, 0);
     db.init(kk::_tmcDriverChop, 0);
-    db.init(kk::_tmcDriverCurrent, 1000); //Ток двайвера
+    db.init(kk::_tmcDriverCurrent, 1000);
     db.init(kk::_tmcDriverMicrostep, 16);  //Микрошаг
     db.init(kk::_tmcDriverInterpolation, 0);
     db.init(kk::_tmcDriverChop, 0);
     db.init(kk::_tmcStepperMaxSpeed, 1000);
     db.init(kk::_tmcStepperSetTarget, 10);
+
+
 
     observer();
 
@@ -105,6 +115,8 @@ void setup() {
     tmcDriverChop.set(db.get(kk::_tmcDriverChop));
     tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
     tmcStepperSetTarget.set(db.get(kk::_tmcStepperSetTarget));
+
+
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -130,15 +142,13 @@ void setup() {
     pinMode(DIAG0, INPUT);
     pinMode(DIAG1, INPUT);
 
-
-
     timber.s("Текст");
 
     pinMode(EN_PIN, OUTPUT);
     pinMode(STEP_PIN, OUTPUT);
     pinMode(DIR_PIN, OUTPUT);
 
-    tmcDriverEnable.set(true);
+    //tmcDriverEnable.set(true);
 
     driver.begin(); //  SPI: Init CS pins and possible SW SPI pins
 
@@ -146,8 +156,8 @@ void setup() {
     driver.toff(5); // Enables driver in software
 
     //driver.rms_current(1200); // Set motor RMS current
-    tmcDriverCurrent.set(700);
-    tmcDriverMicrostep.set(0);
+    //tmcDriverCurrent.set(700);
+    //tmcDriverMicrostep.set(0);
     //driver.microsteps(0); // Set microsteps to 1/16th
 
 
@@ -176,9 +186,9 @@ void setup() {
 
     //ble.init();
 
-    stepper.setMaxSpeed(1000000);
-    tmcStepperMaxSpeed.set(4000);
-    tmcStepperSetTarget.set(50);
+    //stepper.setMaxSpeed(1000000);
+    //tmcStepperMaxSpeed.set(4000);
+    //tmcStepperSetTarget.set(50);
     //stepper.setAcceleration(2000); // ускорение
 
     //TaskWifiLoop();
