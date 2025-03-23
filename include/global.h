@@ -36,7 +36,7 @@ extern WorkMode currentMode;
 extern Timber timber;
 
 
-extern void observer();
+extern void observerAll();
 extern void update();
 
 extern State<int32_t> tmcDriverEnable;

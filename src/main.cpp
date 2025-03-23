@@ -103,9 +103,7 @@ void setup() {
     db.init(kk::_tmcStepperMaxSpeed, 2000);
     db.init(kk::_tmcStepperSetTarget, 10);
 
-
-
-    observer();
+    observerAll();
 
     tmcDriverEnable.set(db.get(kk::_tmcDriverEnable));
     tmcDriverChop.set(db.get(kk::_tmcDriverChop));
@@ -115,8 +113,6 @@ void setup() {
     tmcDriverChop.set(db.get(kk::_tmcDriverChop));
     tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
     tmcStepperSetTarget.set(db.get(kk::_tmcStepperSetTarget));
-
-
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
