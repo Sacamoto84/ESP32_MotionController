@@ -24,6 +24,8 @@ void addMenuElementText(screenAction* menu, const char* text, bool skipping = fa
 void addMenuElementSwitch(screenAction* menu, const char* textOn, const char* textOff, State<int32_t>* value);
 void addMenuElementEDITINT(screenAction* menu, const char* text, const char* textSuffix, State<int32_t>* value,
                            int32_t min, int32_t max, int32_t step);
+void addMenuElementEditFloat(screenAction* menu, const char* text, const char* textSuffix, State<float>* value,
+                           float min, float max, float step);
 void addMenuElementButton(screenAction* menu, const char* text, CallbackType callback);
 
 #endif //ESP32_MOTIONCONTROL_CREATEMENU_H

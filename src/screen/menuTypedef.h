@@ -24,7 +24,7 @@ struct screenAction {
     //Цвета
     uint16_t colorActive= Yellow;
     uint16_t colorInactive = DarkGrey;
-    uint16_t colorBg = RGB565(0, 0, 128);
+    uint16_t colorBg = RGB565(0, 0, 0);
 
     std::vector<itemAction> items; // Динамический список элементов MenuAction
 

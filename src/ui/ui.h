@@ -26,12 +26,13 @@ struct itemAction
         SWITCH, // Действие SWITCH
         EDITINT, // Действие EDITINT
         EDITINTMICROSTEP,
+        EDITFLOAT,
         TEXT,
         BUTTON
     } type = NONE; // По умолчанию элемент пустой
 
     State<int32_t>* value = nullptr;
-
+    State<float>*  valueF = nullptr;
     String textOn;
     String textOff;
     String testSuffix;
@@ -42,6 +43,10 @@ struct itemAction
     int32_t min = 0;
     int32_t max = 1;
     int32_t step = 1;
+
+    float minF = 0.0f;
+    float maxF = 1.0f;
+    float stepF = 1.0f;
 
     //Цвета
     uint16_t colorActive;
@@ -73,5 +78,6 @@ extern void ItemText(int line, int index, itemAction* item, bool* isSelect, int1
 extern void ItemButton(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
 extern void ItemEDITINT(int line, int index, itemAction *item, bool *isSelect, int16_t x, int16_t y);
 extern void ItemMICROSTEP(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
+extern void ItemEditFloat(int line, int index, itemAction *item, bool *isSelect, int16_t x, int16_t y);
 
 #endif //UI_H

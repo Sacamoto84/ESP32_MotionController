@@ -33,6 +33,20 @@ void addMenuElementEDITINT(screenAction* menu, const char* text, const char* tex
     menu->addMenuAction(actions);
 }
 
+void addMenuElementEditFloat(screenAction* menu, const char* text, const char* textSuffix, State<float>* value,
+                           float min, float max, float step)
+{
+    itemAction actions;
+    actions.type = itemAction::EDITFLOAT;
+    actions.text = text;
+    actions.testSuffix = textSuffix;
+    actions.valueF = value;
+    actions.minF = min;
+    actions.maxF = max;
+    actions.stepF = step;
+    menu->addMenuAction(actions);
+}
+
 void addMenuElementButton(screenAction* menu, const char* text, CallbackType callback)
 {
     itemAction actions;

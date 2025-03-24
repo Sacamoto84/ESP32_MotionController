@@ -93,7 +93,7 @@ void Screen(screenAction *screen) {
 
     eb.tick();
 
-    uint16_t colorBg = RGB565(0, 0, 128);
+    uint16_t colorBg = screen->colorBg;//RGB565(0, 0, 128);
 
     // scrollbar
     float sbPercent = (float) (screen->ITEMS_WINDOW) / (float) screen->ITEMS_COUNT;

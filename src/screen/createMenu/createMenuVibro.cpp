@@ -2,48 +2,26 @@
 
 void createMenuVibro()
 {
-    itemAction actions;
 
-    actions.type = itemAction::TEXT;
-    actions.text = (char*)"Режим: Вибро";
-    menuVibro.addMenuAction(actions);
+    addMenuElementButton(&menuContinuous, "Режим: Вибро >",[](int){
+       timber.i("Нажата кнопка: Перейти на Постоянные");
+       currentScreen = MAIN;
+       update();
+   });
 
-    actions.type = itemAction::SWITCH;
-    actions.value = &tmcStepperEnable;
-    actions.textOn = (char*)"Мотор: Вкл";
-    actions.textOff = (char*)"Мотор: Выкл";
-    menuVibro.addMenuAction(actions);
+    addMenuElementSwitch(&menuVibro, "Мотор: Вкл", "Мотор: Выкл", &tmcStepperEnable);
 
-    actions.type = itemAction::TEXT;
-    actions.text = (char*)"Направление: ->";
-    menuVibro.addMenuAction(actions);
-
-    actions.type = itemAction::TEXT;
-    actions.text = (char*)"Скорость: 20 имп/c";
-    menuVibro.addMenuAction(actions);
+    addMenuElementEditFloat(&menuVibro, "Частота: ", "", &vibroFr,1.0f, 200.0f, 1.0f);
+    addMenuElementEditFloat(&menuVibro, "Угол: ", "", &vibroAngle,1.0f, 359.0f, 1.0f);
 
     ///////////////////////////////////
-    actions.type = itemAction::BUTTON;
-    actions.text = "Настройка";
-    actions.callback = [](int data)
-    {
-        Serial2.println("Нажата кнопка: Настройка");
-        currentScreen = CONFIG;
-        update();
-    };
-    menuVibro.addMenuAction(actions);
-    actions.callback = nullptr;
+    addMenuElementButton(&menuVibro, "Настройка",[](int){
+       Serial2.println("Нажата кнопка: Настройка");
+       currentScreen = CONFIG;
+       update();
+    });
     //////////////////////////////////
-
-    actions.type = itemAction::BUTTON;
-    actions.text = "Перезагрузка";
-    actions.callback = [](int data)
-    {
-        esp_restart();
-    };
-    menuVibro.addMenuAction(actions);
-    actions.callback = nullptr;
-
+    addMenuElementButton(&menuContinuous, "Перезагрузка",[](int){ esp_restart(); });
     //////////////////////////////////
     menuVibro.ITEMS_COUNT = menuVibro.items.size();
     menuVibro.ITEMS_WINDOW = 6;

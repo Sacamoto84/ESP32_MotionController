@@ -51,6 +51,8 @@ hw_timer_t *timer = nullptr;
 
 volatile bool state = false;
 
+bool dir = 1;
+
 void IRAM_ATTR onTimer() {
 
     state = !state; // Переключаем состояние
@@ -162,7 +164,7 @@ void setup() {
 
 }
 
-bool dir = 1;
+
 
 void loop() {
 
@@ -177,16 +179,13 @@ void loop() {
 //    }
 
 
-
-
-    //if (currentMode == WorkMode::VIBRO) {
-
-    if (stepper.ready()) {
-        dir = !dir;   // разворачиваем
-        stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
+    if (currentMode == WorkMode::VIBRO)
+    {
+        if (stepper.ready()) {
+            dir = !dir;   // разворачиваем
+            stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
+        }
     }
-
-    //}
 
 
 //    //Режим постоянный
