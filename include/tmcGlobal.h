@@ -5,15 +5,18 @@
 #include <SPI.h>
 #include "TMCStepper.h"
 
+#define DIAG0 35
+#define DIAG1 34
+
 // TMC
-#define EN_PIN 14   // Enable
-#define DIR_PIN 27  // Direction
+#define EN_PIN   14 // Enable
+#define DIR_PIN  27 // Direction
 #define STEP_PIN 26 // Step
 
-#define CS_PIN 25  // Chip select
+#define CS_PIN  25  // Chip select
 #define SW_MOSI 32 // Software Master Out Slave In (MOSI)
 #define SW_MISO 13 // Software Master In Slave Out (MISO)
-#define SW_SCK 33  // Software Slave Clock (SCK)
+#define SW_SCK  33  // Software Slave Clock (SCK)
 
 #define R_SENSE 0.075f // Match to your driver
                        // SilentStepStick series use 0.11
@@ -29,5 +32,7 @@ extern TMC2160Stepper driver;
 
 void report0();
 
-
+////////////////////////////////////
+extern void tmcInit();
+////////////////////////////////////
 #endif // ends #ifndef _TFT_eSPIH_

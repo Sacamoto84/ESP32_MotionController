@@ -33,19 +33,20 @@ enum class WorkMode {
 };
 
 extern WorkMode currentMode;
+
 extern Timber timber;
 
 
 extern void observerAll();
 extern void update();
 
-extern State<int32_t> tmcDriverEnable;
+extern State<int32_t> tmcStepperEnable;
 extern State<int32_t> tmcDriverChop;
 extern State<int32_t> tmcDriverCurrent;
 extern State<int32_t> tmcDriverMicrostep; //Микрошаг
-extern State<int32_t> tmcDriverInterpolation;
+extern State<int32_t> tmcInterpolation;
 
 extern State<int32_t> tmcStepperMaxSpeed;
-extern State<int32_t> tmcStepperSetTarget;   // цель
+extern State<int32_t> tmcStepperTarget;   // цель
 
 #endif // ends #ifndef _TFT_eSPIH_

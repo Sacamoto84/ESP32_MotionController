@@ -35,13 +35,13 @@ void enableCallback(cmd *c)
     String argVal = arg.getValue();
     if (argVal == "on")
     {
-        tmcDriverEnable.set(1);
+        tmcStepperEnable.set(1);
         Serial2.println("Включить мотор");
         update();
     }
     else
     {
-        tmcDriverEnable.set(0);
+        tmcStepperEnable.set(0);
         Serial2.println("Выключить мотор");
         update();
     }

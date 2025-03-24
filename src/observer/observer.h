@@ -9,9 +9,9 @@
 
 extern GyverDBFile db;
 
-extern void tmcStepperSetTargetObserver();
+extern void tmcStepperTargetObserver();
 extern void tmcStepperMaxSpeedObserver();
-extern void tmcDriverEnableObserver();
+extern void tmcStepperEnableObserver();
 extern void tmcDriverChopObserver();
 extern void tmcDriverCurrentObserver();
 extern void tmcDriverMicrostepObserver();

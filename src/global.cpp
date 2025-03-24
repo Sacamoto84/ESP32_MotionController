@@ -5,14 +5,14 @@ WorkMode currentMode = WorkMode::CONTINUOUS;
 
 Timber timber;
 
-State<int32_t> tmcDriverEnable(0);
+State<int32_t> tmcStepperEnable(0);
 State<int32_t> tmcDriverChop(0);
 State<int32_t> tmcDriverCurrent(1000);     //Ток двайвера
 State<int32_t> tmcDriverMicrostep(16);     //Микрошаг
-State<int32_t> tmcDriverInterpolation(0);
+State<int32_t> tmcInterpolation(0);
 
 State<int32_t> tmcStepperMaxSpeed(1000); // скорость движения к цели
-State<int32_t> tmcStepperSetTarget(10);   // цель
+State<int32_t> tmcStepperTarget(10);   // цель
 
 GStepper2<STEPPER2WIRE> stepper(200, STEP_PIN, DIR_PIN, EN_PIN);
 

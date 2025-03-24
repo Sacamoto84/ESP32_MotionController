@@ -20,8 +20,7 @@ void createMenuConfig();
 void createMenuContinuous();
 void createMenuVibro();
 
-
-void addMenuElementText(screenAction* menu, const char* text);
+void addMenuElementText(screenAction* menu, const char* text, bool skipping = false);
 void addMenuElementSwitch(screenAction* menu, const char* textOn, const char* textOff, State<int32_t>* value);
 void addMenuElementEDITINT(screenAction* menu, const char* text, const char* textSuffix, State<int32_t>* value,
                            int32_t min, int32_t max, int32_t step);

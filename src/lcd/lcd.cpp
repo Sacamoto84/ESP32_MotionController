@@ -17,7 +17,6 @@
 
 #define AA_FONT_SMALL _acRoboto_Medium_en_ru_20
 
-
 extern EncButton eb;
 
 // #define TFT_MISO 19
@@ -33,7 +32,6 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 static bool updateLcd = true;
 TaskHandle_t TaskLcd;
 enum CurrenScreen currentScreen = MAIN;
-
 
 [[noreturn]] void TaskLcdLoop(void *parameter);
 
@@ -90,9 +88,6 @@ void lcdInit() {
 void update() {
     updateLcd = true;
 }
-
-
-
 
 void Screen(screenAction *screen) {
 

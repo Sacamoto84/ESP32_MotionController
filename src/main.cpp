@@ -34,8 +34,7 @@ extern AsyncWebSocket ws;
 
 //Ble ble;
 
-#define DIAG0 35
-#define DIAG1 34
+
 
 bool shaft = false;
 
@@ -78,11 +77,13 @@ void setup() {
     timber.colorStringln(15, 36, "Проверка 15 36");
     timber.i("--------------------------------");
 
+    encoderInit();
+    tmcInit();
+
     if  (!LittleFS.begin(true))
         timber.e("Ошибка при монтировании LittleFS");
 
     db.setFS(&LittleFS, "/data.db");
-    //LittleFS.format();
 
     // запуск и инициализация полей БД
     const bool res = db.begin();
@@ -105,14 +106,14 @@ void setup() {
 
     observerAll();
 
-    tmcDriverEnable.set(db.get(kk::_tmcDriverEnable));
+    tmcStepperEnable.set(db.get(kk::_tmcDriverEnable));
     tmcDriverChop.set(db.get(kk::_tmcDriverChop));
     tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
     tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
-    tmcDriverInterpolation.set(db.get(kk::_tmcDriverInterpolation));
+    tmcInterpolation.set(db.get(kk::_tmcDriverInterpolation));
     tmcDriverChop.set(db.get(kk::_tmcDriverChop));
     tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
-    tmcStepperSetTarget.set(db.get(kk::_tmcStepperSetTarget));
+    tmcStepperTarget.set(db.get(kk::_tmcStepperSetTarget));
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -120,47 +121,14 @@ void setup() {
     timerAlarmWrite(timer, 1000000 / (FREQUENCY * 2), true); // Половина периода
     timerAlarmEnable(timer);
 
-
-
-
-
-
     lcdInit();
 
-    encoderInit();
+
     //eb.setEncISR(true);
-
-    pinMode(CS_PIN, INPUT);
-    pinMode(SW_MOSI, INPUT);
-    pinMode(SW_MISO, INPUT);
-    pinMode(SW_SCK, INPUT);
-
-    pinMode(DIAG0, INPUT);
-    pinMode(DIAG1, INPUT);
-
-    timber.s("Текст");
-
-    pinMode(EN_PIN, OUTPUT);
-    pinMode(STEP_PIN, OUTPUT);
-    pinMode(DIR_PIN, OUTPUT);
-
-    //tmcDriverEnable.set(true);
-
-    driver.begin(); //  SPI: Init CS pins and possible SW SPI pins
-
-    // UART: Init SW UART (if selected) with default 115200 baudrate
-    driver.toff(5); // Enables driver in software
-
-    //driver.rms_current(1200); // Set motor RMS current
-    //tmcDriverCurrent.set(700);
-    //tmcDriverMicrostep.set(0);
-    //driver.microsteps(0); // Set microsteps to 1/16th
-
 
     uint32_t drv_status = driver.DRV_STATUS();
     Serial2.print("DRV_STATUS: 0x");
     Serial2.println(drv_status, HEX);
-
 
     // driver.en_pwm_mode(true);       // Toggle stealthChop on TMC2130/2160/5130/5160
 
@@ -198,8 +166,7 @@ bool dir = 1;
 
 void loop() {
 
-    // тикер, вызывать в лупе
-    db.tick();
+    db.tick(); //тикер, вызывать в лупе
 
     //ws.cleanupClients();
     // здесь происходит движение моторов, вызывать как можно чаще
@@ -216,7 +183,7 @@ void loop() {
 
     if (stepper.ready()) {
         dir = !dir;   // разворачиваем
-        stepper.setTarget(dir * tmcStepperSetTarget.get()); // едем в другую сторону
+        stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
     }
 
     //}

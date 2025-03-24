@@ -1,9 +1,9 @@
 #include "observer.h"
 
 void observerAll(){
-    tmcStepperSetTargetObserver();
+    tmcStepperTargetObserver();
     tmcStepperMaxSpeedObserver();
-    tmcDriverEnableObserver();
+    tmcStepperEnableObserver();
     tmcDriverChopObserver();
     tmcDriverCurrentObserver();
     tmcDriverMicrostepObserver();

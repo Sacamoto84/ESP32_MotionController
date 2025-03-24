@@ -1,10 +1,11 @@
 #include "createMenu.h"
 
-void addMenuElementText(screenAction* menu, const char* text)
+void addMenuElementText(screenAction* menu, const char* text, bool skipping)
 {
     itemAction actions;
     actions.type = itemAction::TEXT;
     actions.text = text;
+    actions.skipping = skipping;
     menu->addMenuAction(actions);
 }
 
