@@ -3,9 +3,10 @@
 void createMenuVibro()
 {
 
-    addMenuElementButton(&menuContinuous, "Режим: Вибро >",[](int){
+    addMenuElementButton(&menuVibro, "Режим: Вибро >",[](int){
        timber.i("Нажата кнопка: Перейти на Постоянные");
        currentScreen = MAIN;
+       currentMode = WorkMode::CONTINUOUS;
        update();
    });
 
@@ -13,7 +14,6 @@ void createMenuVibro()
 
     addMenuElementEditFloat(&menuVibro, "Частота: ", "", &vibroFr,1.0f, 200.0f, 1.0f);
     addMenuElementEditFloat(&menuVibro, "Угол: ", "", &vibroAngle,1.0f, 359.0f, 1.0f);
-
     ///////////////////////////////////
     addMenuElementButton(&menuVibro, "Настройка",[](int){
        Serial2.println("Нажата кнопка: Настройка");
@@ -21,7 +21,7 @@ void createMenuVibro()
        update();
     });
     //////////////////////////////////
-    addMenuElementButton(&menuContinuous, "Перезагрузка",[](int){ esp_restart(); });
+    addMenuElementButton(&menuVibro, "Перезагрузка",[](int){ esp_restart(); });
     //////////////////////////////////
     menuVibro.ITEMS_COUNT = menuVibro.items.size();
     menuVibro.ITEMS_WINDOW = 6;

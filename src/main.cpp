@@ -105,6 +105,8 @@ void setup() {
     db.init(kk::_tmcDriverChop, 0);
     db.init(kk::_tmcStepperMaxSpeed, 2000);
     db.init(kk::_tmcStepperSetTarget, 10);
+    db.init(kk::_vibroFr, 10.0f);
+    db.init(kk::_vibroAngle, 10.0f);
 
     observerAll();
 
@@ -113,9 +115,11 @@ void setup() {
     tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
     tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
     tmcInterpolation.set(db.get(kk::_tmcDriverInterpolation));
-    tmcDriverChop.set(db.get(kk::_tmcDriverChop));
     tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
     tmcStepperTarget.set(db.get(kk::_tmcStepperSetTarget));
+
+    vibroFr.set(db.get(kk::_vibroFr));
+    vibroAngle.set(db.get(kk::_vibroAngle));
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -179,7 +183,15 @@ void loop() {
 //    }
 
 
-    if (currentMode == WorkMode::VIBRO)
+    // if (currentMode == WorkMode::VIBRO)
+    // {
+    //     if (stepper.ready()) {
+    //         dir = !dir;   // разворачиваем
+    //         stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
+    //     }
+    // }
+
+    if (currentMode == WorkMode::CONTINUOUS)
     {
         if (stepper.ready()) {
             dir = !dir;   // разворачиваем
@@ -187,6 +199,19 @@ void loop() {
         }
     }
 
+    if (currentMode == WorkMode::VIBRO)
+    {
+        //
+        const float stepI = 1.8f/static_cast<float>(tmcDriverMicrostep.get()); //Угол поворота на один шаг
+        const float a = (vibroAngle.get()/stepI)/2.0f;
+        vibroTarget = static_cast<int32_t>(a);
+        //
+
+        if (stepper.ready()) {
+            vibroDir = !vibroDir;   // разворачиваем
+            stepper.setTarget(vibroDir * vibroTarget); // едем в другую сторону
+        }
+    }
 
 //    //Режим постоянный
 //    if (currentMode == WorkMode::CONTINUOUS) {

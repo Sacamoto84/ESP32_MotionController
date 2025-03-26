@@ -22,7 +22,9 @@ DB_KEYS(kk,
     _tmcDriverMicrostep,
     _tmcDriverInterpolation,
     _tmcStepperMaxSpeed,
-    _tmcStepperSetTarget
+    _tmcStepperSetTarget,
+    _vibroAngle,
+    _vibroFr
 );
 
 extern GStepper2<STEPPER2WIRE> stepper;
@@ -51,5 +53,6 @@ extern State<int32_t> tmcStepperTarget;   // цель
 extern State<float>  vibroFr;    //Частот вибрации Hz
 extern State<float>  vibroAngle; //Угол поворота 1..359
 extern bool vibroDir; //Рантайм переменная направления
+extern int vibroTarget;
 
 #endif // ends #ifndef _TFT_eSPIH_

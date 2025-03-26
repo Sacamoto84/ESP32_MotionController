@@ -8,6 +8,7 @@ void createMenuContinuous()
     addMenuElementButton(&menuContinuous, "Режим: Постоянный >",[](int){
        timber.i("Нажата кнопка: Перейти на вибро");
        currentScreen = VIBRO;
+       currentMode = WorkMode::VIBRO;
        update();
    });
 

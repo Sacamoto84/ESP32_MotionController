@@ -53,7 +53,7 @@ void lcdInit() {
 [[noreturn]] void TaskLcdLoop(void *parameter) {
     tft.init();
     tft.setRotation(3);
-    tft.fillScreen(0x1234);
+    tft.fillScreen(0);
     tft.setTextColor(WHITE, BLACK);
     // tft.drawString("TFT_eSPI example", 30, 30, 2);
 
@@ -79,6 +79,13 @@ void lcdInit() {
                 s = &menuVibro;
                 break;
         }
+
+
+        //tft.fillScreen(BLACK);
+        //tft.drawLine(0, 64, 239,64, YELLOW);
+
+        //tft.drawCircle(120,64, 10, YELLOW);
+        //tft.drawPixel(16,16, YELLOW);
 
         Screen(s);
         delay(1);
@@ -173,7 +180,7 @@ void Screen(screenAction *screen) {
         }
     }
 
-    delay(5);
+    //delay(5);
 }
 
 

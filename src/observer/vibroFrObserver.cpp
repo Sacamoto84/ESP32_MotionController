@@ -6,9 +6,9 @@
 void vibroFrObserver(){
 
     vibroFr.addObserver([](float value) {
-         timber.i("Observer: vibroFr изменен %f\n", value);
-
-         //db.set(kk::_tmcStepperSetTarget, value);
+         timber.i("Observer: vibroFr изменен %f", value);
+         stepper.setMaxSpeed(3000);
+         db.set(kk::_vibroFr, value);
      });
 
 }
