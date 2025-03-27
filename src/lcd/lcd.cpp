@@ -88,7 +88,8 @@ void lcdInit() {
         //tft.drawPixel(16,16, YELLOW);
 
         Screen(s);
-        delay(1);
+
+        delay(5);
     }
 }
 

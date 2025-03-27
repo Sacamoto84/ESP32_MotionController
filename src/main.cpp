@@ -34,7 +34,7 @@ extern AsyncWebSocket ws;
 
 //Ble ble;
 
-
+extern void initTaskDb();
 
 bool shaft = false;
 
@@ -49,21 +49,13 @@ GyverDBFile db;
 
 hw_timer_t *timer = nullptr;
 
-volatile bool state = false;
+//volatile bool state = false;
 
 bool dir = 1;
 
 void IRAM_ATTR onTimer() {
-
-    state = !state; // Переключаем состояние
-
-    //Режим постоянный
-//    if (currentMode == WorkMode::CONTINUOUS) {
-//        digitalWrite(STEP_PIN, state);
-//    }
-
+    //state = !state; // Переключаем состояние
     stepper.tick();
-
 }
 
 void setup() {
@@ -110,16 +102,16 @@ void setup() {
 
     observerAll();
 
-    tmcStepperEnable.set(db.get(kk::_tmcDriverEnable));
-    tmcDriverChop.set(db.get(kk::_tmcDriverChop));
-    tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
-    tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
-    tmcInterpolation.set(db.get(kk::_tmcDriverInterpolation));
-    tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
-    tmcStepperTarget.set(db.get(kk::_tmcStepperSetTarget));
+    tmcStepperEnable.setInvoke(db.get(kk::_tmcDriverEnable));
+    tmcDriverChop.setInvoke(db.get(kk::_tmcDriverChop));
+    tmcDriverCurrent.setInvoke(db.get(kk::_tmcDriverCurrent));
+    tmcDriverMicrostep.setInvoke(db.get(kk::_tmcDriverMicrostep));
+    tmcInterpolation.setInvoke(db.get(kk::_tmcDriverInterpolation));
+    tmcStepperMaxSpeed.setInvoke(db.get(kk::_tmcStepperMaxSpeed));
+    tmcStepperTarget.setInvoke(db.get(kk::_tmcStepperSetTarget));
 
-    vibroFr.set(db.get(kk::_vibroFr));
-    vibroAngle.set(db.get(kk::_vibroAngle));
+    vibroFr.setInvoke(db.get(kk::_vibroFr));
+    vibroAngle.setInvoke(db.get(kk::_vibroAngle));
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -153,6 +145,7 @@ void setup() {
     Serial2.print("toff: ");
     Serial2.println(driver.toff());
 
+    initTaskDb();
 
     //ble.init();
 
@@ -170,26 +163,24 @@ void setup() {
 
 
 
+void IRAM_ATTR vibro()
+{
+        //
+        const float stepI = 1.8f/static_cast<float>(tmcDriverMicrostep.get()); //Угол поворота на один шаг
+        const float a = (vibroAngle.get()/stepI);
+        vibroTarget = static_cast<int32_t>(a);
+        //
+
+        if (stepper.ready()) {
+            vibroDir = !vibroDir;   // разворачиваем
+            stepper.setTarget(vibroDir * vibroTarget); // едем в другую сторону
+        }
+}
+
+
 void loop() {
 
-    db.tick(); //тикер, вызывать в лупе
-
-    //ws.cleanupClients();
-    // здесь происходит движение моторов, вызывать как можно чаще
-
-    //Режим постоянный
-//    if (currentMode == WorkMode::CONTINUOUS) {
-//        digitalWrite(STEP_PIN, state);
-//    }
-
-
-    // if (currentMode == WorkMode::VIBRO)
-    // {
-    //     if (stepper.ready()) {
-    //         dir = !dir;   // разворачиваем
-    //         stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
-    //     }
-    // }
+    //db.tick(); //тикер, вызывать в лупе
 
     if (currentMode == WorkMode::CONTINUOUS)
     {
@@ -198,21 +189,10 @@ void loop() {
             stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
         }
     }
-
     if (currentMode == WorkMode::VIBRO)
     {
-        //
-        const float stepI = 1.8f/static_cast<float>(tmcDriverMicrostep.get()); //Угол поворота на один шаг
-        const float a = (vibroAngle.get()/stepI)/2.0f;
-        vibroTarget = static_cast<int32_t>(a);
-        //
-
-        if (stepper.ready()) {
-            vibroDir = !vibroDir;   // разворачиваем
-            stepper.setTarget(vibroDir * vibroTarget); // едем в другую сторону
-        }
+        vibro();
     }
-
 //    //Режим постоянный
 //    if (currentMode == WorkMode::CONTINUOUS) {
 //
@@ -258,27 +238,34 @@ void loop() {
     //       Serial2.println(String("vars ") + var1 + ',' + var2 + ',' + var3);
     //   }
 
-
-
-
-
-
-
-
-
-
-
-    // Run 5000 steps and switch direction in software
-    // while (true) {
-
-    // digitalWrite(STEP_PIN, HIGH);
-    // // lay(1);
-    // delayMicroseconds(2000);
-    // digitalWrite(STEP_PIN, LOW);
-    // // delay(1);
-    // delayMicroseconds(2000);
-
     //}
     // shaft = !shaft;
     // driver.shaft(shaft);
+}
+
+
+
+
+TaskHandle_t TaskDb;
+
+[[noreturn]] void TaskDbLoop(void *parameter)
+{
+   for (;;)
+   {
+     db.tick();
+     delay(1000);
+   }
+}
+
+
+void initTaskDb()
+{
+    xTaskCreatePinnedToCore(
+              TaskDbLoop,    /* Функция для задачи */
+              "TaskDbLoop",     /* Имя задачи */
+              10000,         /* Размер стека */
+              nullptr,          /* Параметр задачи */
+              5,                /* Приоритет */
+              &TaskDb,                  /* Выполняемая операция */
+              0);                /* Номер ядра, на котором она должна выполняться */
 }

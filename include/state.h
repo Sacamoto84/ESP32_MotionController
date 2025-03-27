@@ -26,14 +26,17 @@ public:
         }
     }
 
+    //Записать в любом случае
+    void setInvoke(T newValue)
+    {
+        value = newValue;
+        notifyObservers();
+    }
+
     // Добавление наблюдателя
     void addObserver(const std::function<void(T)>& observer) {
         observers.push_back(observer);
     }
-
-private:
-    T value;
-    std::vector<std::function<void(T)>> observers;
 
     // Уведомление всех наблюдателей о новом значении
     void notifyObservers() {
@@ -41,6 +44,12 @@ private:
             observer(value);
         }
     }
+
+private:
+    T value;
+    std::vector<std::function<void(T)>> observers;
+
+
 };
 
 #endif
