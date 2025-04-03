@@ -18,4 +18,7 @@ extern void tmcDriverMicrostepObserver();
 extern void vibroFrObserver();
 extern void vibroAngleObserver();
 
+extern void currentModeObserver();
+extern void constRpsObserver();
+
 #endif //OBSERVER_H

@@ -110,8 +110,9 @@ void setup() {
     tmcStepperMaxSpeed.setInvoke(db.get(kk::_tmcStepperMaxSpeed));
     tmcStepperTarget.setInvoke(db.get(kk::_tmcStepperSetTarget));
 
-    vibroFr.setInvoke(db.get(kk::_vibroFr));
     vibroAngle.setInvoke(db.get(kk::_vibroAngle));
+    vibroFr.setInvoke(db.get(kk::_vibroFr));
+
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -182,14 +183,12 @@ void loop() {
 
     //db.tick(); //тикер, вызывать в лупе
 
-    if (currentMode == WorkMode::CONTINUOUS)
+    if (currentMode.get()  == WorkMode::CONTINUOUS)
     {
-        if (stepper.ready()) {
-            dir = !dir;   // разворачиваем
-            stepper.setTarget(dir * tmcStepperTarget.get()); // едем в другую сторону
-        }
+        //stepper.setSpeed(1000);
     }
-    if (currentMode == WorkMode::VIBRO)
+
+    if (currentMode.get() == WorkMode::VIBRO)
     {
         vibro();
     }

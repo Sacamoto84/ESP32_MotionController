@@ -34,9 +34,13 @@ enum class WorkMode {
     VIBRO,
 };
 
-extern WorkMode currentMode;
+//extern WorkMode currentMode;
+
+extern State<WorkMode> currentMode (WorkMode::CONTINUOUS);
 
 extern Timber timber;
+
+
 
 
 extern void observerAll();
@@ -50,9 +54,14 @@ extern State<int32_t> tmcInterpolation;
 
 extern State<int32_t> tmcStepperMaxSpeed;
 extern State<int32_t> tmcStepperTarget;   // цель
+
 extern State<float>  vibroFr;    //Частот вибрации Hz
 extern State<float>  vibroAngle; //Угол поворота 1..359
 extern bool vibroDir; //Рантайм переменная направления
 extern int vibroTarget;
+
+
+extern State <float> constRps; //Скорость оборотов в секунду
+
 
 #endif // ends #ifndef _TFT_eSPIH_
