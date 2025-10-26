@@ -14,8 +14,6 @@ State<int32_t> tmcStepperTarget(10);      // цель
 //=== Cont ===
 State <float> constRps(1); //Скорость оборотов в секунду
 
-
-
 //=== Vibro ===
 State<float>  vibroFr(10.0f);    //Частот вибрации Hz
 State<float>  vibroAngle(30.0f); //Угол поворота 1..359
@@ -27,11 +25,3 @@ GStepper2<STEPPER2WIRE> stepper(200, STEP_PIN, DIR_PIN, EN_PIN);
 Timber timber;
 
 extern GyverDBFile db;
-
-
-
-
-
-
-
-

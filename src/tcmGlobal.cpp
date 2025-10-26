@@ -23,5 +23,4 @@ void report0(){
     buf20[0] = 'R';
     buf20[2] = tmcStepperEnable.get() | tmcDriverChop.get()<<1;
     
-
 }

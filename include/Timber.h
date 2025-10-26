@@ -11,8 +11,6 @@
 #define COLOR_ERROR   "\33[38;05;9m"
 #define COLOR_RESET   "\33[0m"
 
-
-
 class Timber {
 public:
 
