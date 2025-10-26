@@ -19,15 +19,15 @@ public:
     }
 
     // Установка нового значения с уведомлением наблюдателей
-    void set(T newValue) {
-        if (value != newValue) {
-            value = newValue;
-            notifyObservers();
-        }
-    }
+    // void set(T newValue) {
+    //     if (value != newValue) {
+    //         value = newValue;
+    //         notifyObservers();
+    //     }
+    // }
 
     //Записать в любом случае
-    void setInvoke(T newValue)
+    void set(T newValue)
     {
         value = newValue;
         notifyObservers();

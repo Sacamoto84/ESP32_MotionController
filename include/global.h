@@ -36,12 +36,9 @@ enum class WorkMode {
 
 //extern WorkMode currentMode;
 
-extern State<WorkMode> currentMode (WorkMode::CONTINUOUS);
+extern State<WorkMode> currentMode;
 
 extern Timber timber;
-
-
-
 
 extern void observerAll();
 extern void update();

@@ -73,8 +73,9 @@ void setup() {
 
     encoderInit();
     tmcInit();
+    cliInit();
 
-    if  (!LittleFS.begin(true))
+    if (!LittleFS.begin(true))
         timber.e("Ошибка при монтировании LittleFS");
 
     db.setFS(&LittleFS, "/data.db");
@@ -94,7 +95,6 @@ void setup() {
     db.init(kk::_tmcDriverCurrent, 1000);
     db.init(kk::_tmcDriverMicrostep, 16);  //Микрошаг
     db.init(kk::_tmcDriverInterpolation, 0);
-    db.init(kk::_tmcDriverChop, 0);
     db.init(kk::_tmcStepperMaxSpeed, 2000);
     db.init(kk::_tmcStepperSetTarget, 10);
     db.init(kk::_vibroFr, 10.0f);
@@ -102,16 +102,16 @@ void setup() {
 
     observerAll();
 
-    tmcStepperEnable.setInvoke(db.get(kk::_tmcDriverEnable));
-    tmcDriverChop.setInvoke(db.get(kk::_tmcDriverChop));
-    tmcDriverCurrent.setInvoke(db.get(kk::_tmcDriverCurrent));
-    tmcDriverMicrostep.setInvoke(db.get(kk::_tmcDriverMicrostep));
-    tmcInterpolation.setInvoke(db.get(kk::_tmcDriverInterpolation));
-    tmcStepperMaxSpeed.setInvoke(db.get(kk::_tmcStepperMaxSpeed));
-    tmcStepperTarget.setInvoke(db.get(kk::_tmcStepperSetTarget));
+    tmcStepperEnable.set(db.get(kk::_tmcDriverEnable));
+    tmcDriverChop.set(db.get(kk::_tmcDriverChop));
+    tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
+    tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
+    tmcInterpolation.set(db.get(kk::_tmcDriverInterpolation));
+    tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
+    tmcStepperTarget.set(db.get(kk::_tmcStepperSetTarget));
 
-    vibroAngle.setInvoke(db.get(kk::_vibroAngle));
-    vibroFr.setInvoke(db.get(kk::_vibroFr));
+    vibroAngle.set(db.get(kk::_vibroAngle));
+    vibroFr.set(db.get(kk::_vibroFr));
 
 
     // Создаем таймер
@@ -180,6 +180,12 @@ void IRAM_ATTR vibro()
 
 
 void loop() {
+
+    // Обработка команд CLI
+    if (Serial2.available()) {
+        String input = Serial2.readStringUntil('\n');
+        cli.parse(input);
+    }
 
     //db.tick(); //тикер, вызывать в лупе
 

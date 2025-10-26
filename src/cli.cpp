@@ -65,18 +65,17 @@ void readGSONCallback(cmd *c)
 {
     Command cmd(c);
     Serial2.print("Прочесть GCONF:");
-    // uint32_t a = driver.GCONF();
     printBits(driver.GCONF());
 
     Serial2.print("Прочесть MSCNT:");
     printBits(driver.MSCNT());
 
-      Serial2.print("Прочесть CHOPCONF:");
+    Serial2.print("Прочесть CHOPCONF:");
     printBits(driver.CHOPCONF());
 
     Serial2.print("Прочесть DRV_STATUS:");
     printBits(driver.DRV_STATUS());
-    
+
 }
 
 void pingCallback(cmd *cmdPtr)

@@ -9,7 +9,7 @@ void tmcDriverMicrostepObserver(){
         driver.microsteps(a);
         db.set(kk::_tmcDriverMicrostep, value);
 
-        if (currentMode == WorkMode::VIBRO)
+        if (currentMode.get() == WorkMode::VIBRO)
         {
             vibroAngle.notifyObservers();
             vibroFr.notifyObservers();

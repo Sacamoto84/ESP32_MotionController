@@ -8,11 +8,13 @@ void ItemEDITINT(int line, int index, itemAction *item, bool *isSelect, int16_t 
         if (a) {
             if (eb.right()) {
                 int32_t t = item->value->get() + item->step;
-                if (t >= item->max) t = item->max; item->value->set(t);
+                if (t >= item->max) t = item->max; 
+                item->value->set(t);
             }
             if (eb.left()) {
                 int32_t t = item->value->get() - item->step;
-                if (t <= item->min) t = item->min; item->value->set(t);
+                if (t <= item->min) t = item->min; 
+                item->value->set(t);
             }
         }
     }
