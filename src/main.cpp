@@ -139,9 +139,14 @@ void setup()
     }
 
     eepromDump(0, 32);
+    eep.writeInt(0, 0x1234);
+    eep.writeFloat(2, 1.2F);
+    eepromDump(0, 32);
+    int temp = eep.readInt(0);
+    timber.println("read Int = 0x%x", temp);
+    timber.println("read Float = 0x%f", eep.readFloat(2));
 
-
-    eep.write(0, 10);
+    // eep.write(0, 10);
 
     // запуск и инициализация полей БД
     const bool res = db.begin();
