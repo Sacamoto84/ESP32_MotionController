@@ -8,25 +8,19 @@
 
 // Класс для хранения состояния с поддержкой наблюдателей
 template <typename T>
-class State {
+class State
+{
 public:
     // Конструктор для инициализации состояния
     explicit State(T initialValue) : value(initialValue) {}
 
     // Получение текущего значения
-    T get() const {
+    T get() const
+    {
         return value;
     }
 
-    // Установка нового значения с уведомлением наблюдателей
-    // void set(T newValue) {
-    //     if (value != newValue) {
-    //         value = newValue;
-    //         notifyObservers();
-    //     }
-    // }
-
-    //Записать в любом случае
+    // Записать в любом случае
     void set(T newValue)
     {
         value = newValue;
@@ -34,13 +28,16 @@ public:
     }
 
     // Добавление наблюдателя
-    void addObserver(const std::function<void(T)>& observer) {
+    void addObserver(const std::function<void(T)> &observer)
+    {
         observers.push_back(observer);
     }
 
     // Уведомление всех наблюдателей о новом значении
-    void notifyObservers() {
-        for (const auto& observer : observers) {
+    void notifyObservers()
+    {
+        for (const auto &observer : observers)
+        {
             observer(value);
         }
     }
@@ -48,8 +45,6 @@ public:
 private:
     T value;
     std::vector<std::function<void(T)>> observers;
-
-
 };
 
 #endif

@@ -17,7 +17,7 @@ void tmcInit(){
     pinMode(DIR_PIN, OUTPUT);
 
     driver.begin();    //  SPI: Init CS pins and possible SW SPI pins
-    driver.toff(5); // Enables driver in software
+    driver.toff(5);    // Enables driver in software
 
     timber.i("TMC инициализирован");
 }

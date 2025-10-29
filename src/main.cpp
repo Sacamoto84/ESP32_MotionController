@@ -22,6 +22,15 @@
 
 #include <ESPAsyncWebServer.h>
 
+#include <JC_EEPROM.h> // https://github.com/JChristensen/JC_EEPROM
+// #include <Streaming.h>      // https://github.com/janelia-arduino/Streaming
+#include <Wire.h> // https://arduino.cc/en/Reference/Wire
+
+constexpr bool erase{false};        // true writes 0xFF to all addresses,
+                                    //   false performs write/read test
+constexpr uint32_t totalKBytes{64}; // for read and write test functions
+constexpr uint8_t btnStart{6};      // pin for start button
+
 extern EncButton eb;
 
 extern void lcdInit();
@@ -32,7 +41,7 @@ extern void wifi_loop();
 
 extern AsyncWebSocket ws;
 
-//Ble ble;
+// Ble ble;
 
 extern void initTaskDb();
 
@@ -40,27 +49,36 @@ bool shaft = false;
 
 GyverDBFile db;
 
-//esp8266/esp32
-// IRAM_ATTR void isr() {
-//     eb.tickISR();
-// }
+// esp8266/esp32
+//  IRAM_ATTR void isr() {
+//      eb.tickISR();
+//  }
 
 #define FREQUENCY 100000 // Частота меандра в Гц (1 кГц)
 
 hw_timer_t *timer = nullptr;
 
-//volatile bool state = false;
+// volatile bool state = false;
 
 bool dir = 1;
 
-void IRAM_ATTR onTimer() {
-    //state = !state; // Переключаем состояние
-    stepper.tick();
+void IRAM_ATTR onTimer()
+{
+    // state = !state; // Переключаем состояние
+
+    // static uint32_t tickCount = 0;
+    // tickCount++;
+    // if (tickCount % 1000 == 0)
+    // {
+    //     timber.i("DEBUG: onTimer tick count = %d", tickCount);
+    // }
+    // stepper.tick();
 }
 
-void setup() {
+void setup()
+{
     esp_task_wdt_init(30, false);
-    Serial.begin(921600);
+    Serial.begin(115200);
     Serial2.begin(2000000);
 
     Timber::clear();
@@ -80,39 +98,87 @@ void setup() {
 
     db.setFS(&LittleFS, "/data.db");
 
+    uint8_t eepStatus = eep.begin(JC_EEPROM::twiClock100kHz); // go fast!
+
+    // 0: success.
+    // 1: data too long to fit in transmit buffer.
+    // 2: received NACK on transmit of address.
+    // 3: received NACK on transmit of data.
+    // 4: other error.
+    // 5: timeout
+
+    switch (eepStatus)
+    {
+    case 0:
+        timber.s("extEEPROM.begin() success");
+        break;
+
+    case 1:
+        timber.e("extEEPROM.begin() failed, 1: data too long to fit in transmit buffer.");
+        break;
+
+    case 2:
+        timber.e("extEEPROM.begin() failed, 2: received NACK on transmit of address.");
+        break;
+
+    case 3:
+        timber.e("extEEPROM.begin() failed, 3: received NACK on transmit of data.");
+        break;
+
+    case 4:
+        timber.e("extEEPROM.begin() failed, 4: other error.");
+        break;
+
+    case 5:
+        timber.e("extEEPROM.begin() failed, 5 :timeout.");
+        break;
+
+    default:
+        timber.e("extEEPROM.begin() failed, default");
+        break;
+    }
+
+    eepromDump(0, 32);
+
+
+    eep.write(0, 10);
+
     // запуск и инициализация полей БД
     const bool res = db.begin();
 
     if (!res)
         timber.e("Ошибка открытия базы");
 
-    else timber.i("База на диске");
+    else
+        timber.i("База на диске");
     db.dump(Serial2);
     timber.i("--------------------------------");
 
     db.init(kk::_tmcDriverEnable, 0);
     db.init(kk::_tmcDriverChop, 0);
     db.init(kk::_tmcDriverCurrent, 1000);
-    db.init(kk::_tmcDriverMicrostep, 16);  //Микрошаг
+    db.init(kk::_tmcDriverMicrostep, 16); // Микрошаг
     db.init(kk::_tmcDriverInterpolation, 0);
     db.init(kk::_tmcStepperMaxSpeed, 2000);
     db.init(kk::_tmcStepperSetTarget, 10);
     db.init(kk::_vibroFr, 10.0f);
     db.init(kk::_vibroAngle, 10.0f);
 
+    timber.i("DEBUG: DB init values - MaxSpeed: %d, Target: %d, VibroFr: %.2f, VibroAngle: %.2f",
+             db.get(kk::_tmcStepperMaxSpeed), db.get(kk::_tmcStepperSetTarget),
+             db.get(kk::_vibroFr), db.get(kk::_vibroAngle));
+
     observerAll();
 
-    tmcStepperEnable.set(db.get(kk::_tmcDriverEnable));
     tmcDriverChop.set(db.get(kk::_tmcDriverChop));
-    tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
     tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
     tmcInterpolation.set(db.get(kk::_tmcDriverInterpolation));
     tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
     tmcStepperTarget.set(db.get(kk::_tmcStepperSetTarget));
-
     vibroAngle.set(db.get(kk::_vibroAngle));
     vibroFr.set(db.get(kk::_vibroFr));
-
+    tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
+    tmcStepperEnable.set(db.get(kk::_tmcDriverEnable));
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -122,8 +188,7 @@ void setup() {
 
     lcdInit();
 
-
-    //eb.setEncISR(true);
+    // eb.setEncISR(true);
 
     uint32_t drv_status = driver.DRV_STATUS();
     Serial2.print("DRV_STATUS: 0x");
@@ -148,74 +213,73 @@ void setup() {
 
     initTaskDb();
 
-    //ble.init();
+    // ble.init();
 
-    //stepper.setMaxSpeed(1000000);
-    //tmcStepperMaxSpeed.set(4000);
-    //tmcStepperSetTarget.set(50);
-    //stepper.setAcceleration(2000); // ускорение
+    // stepper.setMaxSpeed(1000000);
+    // tmcStepperMaxSpeed.set(4000);
+    // tmcStepperSetTarget.set(50);
+    // stepper.setAcceleration(2000); // ускорение
 
-    //TaskWifiLoop();
-    //wifi_loop();
-
-
-
+    // TaskWifiLoop();
+    // wifi_loop();
 }
-
-
 
 void IRAM_ATTR vibro()
 {
-        //
-        const float stepI = 1.8f/static_cast<float>(tmcDriverMicrostep.get()); //Угол поворота на один шаг
-        const float a = (vibroAngle.get()/stepI);
-        vibroTarget = static_cast<int32_t>(a);
-        //
+    //
+    const float stepI = 1.8f / static_cast<float>(tmcDriverMicrostep.get()); // Угол поворота на один шаг
+    timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
+    const float a = (vibroAngle.get() / stepI);
+    vibroTarget = static_cast<int32_t>(a);
+    timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
+    //
 
-        if (stepper.ready()) {
-            vibroDir = !vibroDir;   // разворачиваем
-            stepper.setTarget(vibroDir * vibroTarget); // едем в другую сторону
-        }
+    if (stepper.ready())
+    {
+        vibroDir = !vibroDir; // разворачиваем
+        int32_t target = vibroDir * vibroTarget;
+        timber.i("DEBUG: vibroDir = %d, setting target = %d", vibroDir, target);
+        stepper.setTarget(target); // едем в другую сторону
+    }
 }
 
-
-void loop() {
+void loop()
+{
 
     // Обработка команд CLI
-    if (Serial2.available()) {
+    if (Serial2.available())
+    {
         String input = Serial2.readStringUntil('\n');
         cli.parse(input);
     }
 
-    //db.tick(); //тикер, вызывать в лупе
+    // db.tick(); //тикер, вызывать в лупе
 
-    if (currentMode.get()  == WorkMode::CONTINUOUS)
+    if (currentMode.get() == WorkMode::CONTINUOUS)
     {
-        //stepper.setSpeed(1000);
+        // stepper.setSpeed(1000);
     }
 
     if (currentMode.get() == WorkMode::VIBRO)
     {
         vibro();
     }
-//    //Режим постоянный
-//    if (currentMode == WorkMode::CONTINUOUS) {
-//
-//        digitalWrite(STEP_PIN, HIGH);
-//        // // lay(1);
-//        delayMicroseconds(2000);
-//        digitalWrite(STEP_PIN, LOW);
-//        // // delay(1);
-//        delayMicroseconds(2000);
-//
-//    }
-//
-//    if (currentMode == WorkMode::VIBRO) {
-//
-//
-//    }
-
-
+    //    //Режим постоянный
+    //    if (currentMode == WorkMode::CONTINUOUS) {
+    //
+    //        digitalWrite(STEP_PIN, HIGH);
+    //        // // lay(1);
+    //        delayMicroseconds(2000);
+    //        digitalWrite(STEP_PIN, LOW);
+    //        // // delay(1);
+    //        delayMicroseconds(2000);
+    //
+    //    }
+    //
+    //    if (currentMode == WorkMode::VIBRO) {
+    //
+    //
+    //    }
 
     //  eb.tick();
     //  // выбор переменной для изменения
@@ -248,29 +312,25 @@ void loop() {
     // driver.shaft(shaft);
 }
 
-
-
-
 TaskHandle_t TaskDb;
 
 [[noreturn]] void TaskDbLoop(void *parameter)
 {
-   for (;;)
-   {
-     db.tick();
-     delay(1000);
-   }
+    for (;;)
+    {
+        db.tick();
+        delay(1000);
+    }
 }
-
 
 void initTaskDb()
 {
     xTaskCreatePinnedToCore(
-              TaskDbLoop,    /* Функция для задачи */
-              "TaskDbLoop",     /* Имя задачи */
-              10000,         /* Размер стека */
-              nullptr,          /* Параметр задачи */
-              5,                /* Приоритет */
-              &TaskDb,                  /* Выполняемая операция */
-              0);                /* Номер ядра, на котором она должна выполняться */
+        TaskDbLoop,   /* Функция для задачи */
+        "TaskDbLoop", /* Имя задачи */
+        20000,        /* Размер стека */
+        nullptr,      /* Параметр задачи */
+        5,            /* Приоритет */
+        &TaskDb,      /* Выполняемая операция */
+        0);           /* Номер ядра, на котором она должна выполняться */
 }

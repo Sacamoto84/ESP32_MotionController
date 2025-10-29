@@ -19,8 +19,6 @@ TMC2160Stepper driver(CS_PIN, R_SENSE, SW_MOSI, SW_MISO, SW_SCK);
 */
 void report0(){
     memset(buf20, 0, sizeof(buf20));
-
     buf20[0] = 'R';
     buf20[2] = tmcStepperEnable.get() | tmcDriverChop.get()<<1;
-    
 }

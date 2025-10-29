@@ -6,9 +6,9 @@ State<WorkMode> currentMode (WorkMode::CONTINUOUS);
 State<int32_t> tmcStepperEnable(0);
 State<int32_t> tmcDriverChop(0);
 State<int32_t> tmcDriverCurrent(1);     //Ток двайвера
-State<int32_t> tmcDriverMicrostep(512);     //Микрошаг
+State<int32_t> tmcDriverMicrostep(16);     //Микрошаг
 State<int32_t> tmcInterpolation(0);
-State<int32_t> tmcStepperMaxSpeed(-1000);  // скорость движения к цели
+State<int32_t> tmcStepperMaxSpeed(1000);  // скорость движения к цели
 State<int32_t> tmcStepperTarget(10);      // цель
 
 //=== Cont ===
@@ -25,3 +25,8 @@ GStepper2<STEPPER2WIRE> stepper(200, STEP_PIN, DIR_PIN, EN_PIN);
 Timber timber;
 
 extern GyverDBFile db;
+
+// Two 24LC256 EEPROMs on the bus
+JC_EEPROM eep(JC_EEPROM::kbits_32, 2, 32); // device size, number of devices, page size
+
+

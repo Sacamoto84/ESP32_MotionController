@@ -11,6 +11,8 @@
                 "H:/PlatformIO/ESP32_MotionControl/include",
                 "H:/PlatformIO/ESP32_MotionControl/src",
                 "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
+                "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/JC_EEPROM/src",
+                "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/GyverDB/src",
                 "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/FOR_MACRO",
                 "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/StringUtils/src",
@@ -252,7 +254,6 @@
                 "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                 "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                 "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 ""
             ],
             "browse": {
@@ -261,6 +262,8 @@
                     "H:/PlatformIO/ESP32_MotionControl/include",
                     "H:/PlatformIO/ESP32_MotionControl/src",
                     "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
+                    "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/JC_EEPROM/src",
+                    "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/GyverDB/src",
                     "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/FOR_MACRO",
                     "H:/PlatformIO/ESP32_MotionControl/.pio/libdeps/esp32dev/StringUtils/src",
@@ -502,7 +505,6 @@
                     "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                     "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                     "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                    "C:/Users/Ivan/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     ""
                 ]
             },
