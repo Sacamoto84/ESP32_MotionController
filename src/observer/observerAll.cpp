@@ -1,8 +1,6 @@
 #include "observer.h"
 
 void observerAll(){
-
-
     tmcStepperTargetObserver();
     tmcStepperMaxSpeedObserver();
     tmcStepperEnableObserver();
@@ -11,9 +9,6 @@ void observerAll(){
     tmcDriverMicrostepObserver();
     vibroAngleObserver();
     vibroFrObserver();
-
     currentModeObserver();
-
     constRpsObserver();
-
 }
