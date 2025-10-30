@@ -6,7 +6,7 @@ void tmcDriverCurrentObserver(){
     tmcDriverCurrent.addObserver([](int32_t value) {
         timber.i("Observer: tmcDriverCurrent updated %d", value);
         driver.rms_current(value); // Set motor RMS current
-        db.set(kk::_tmcDriverCurrent, value);
+        tmcDriverCurrent.save();
     });
 
 }

@@ -8,6 +8,10 @@
 #include <JC_EEPROM.h>
 #include <Wire.h>
 
+#include "Timber.h"
+
+extern Timber timber; 
+
 // Constructor.
 // - deviceCapacity is the capacity of a single EEPROM device in
 //   kilobits (kb) and should be one of the values defined in the
@@ -159,17 +163,10 @@ int16_t JC_EEPROM::read(uint32_t addr)
  * Read integer
  */
 unsigned int JC_EEPROM::readInt(unsigned int address) {
-	read(address, _b, 2);
+	read(address, _b, 4);
 	return *(unsigned int*)&_b[0];
 }
 
-/**
- * Read long
- */
-unsigned long JC_EEPROM::readLong(unsigned int address) {
-	read(address, _b, 4);
-	return *(unsigned long*)&_b[0];
-}
 
 /**
  * Read float
@@ -198,13 +195,6 @@ void JC_EEPROM::readChars(unsigned int address, char *data, int n) {
  * Write integer
  */
 void JC_EEPROM::writeInt(unsigned int address, unsigned int data) {
-	write(address, (byte*)&data, 2);
-}
-
-/**
- * Write long
- */
-void JC_EEPROM::writeLong(unsigned int address, unsigned long data) {
 	write(address, (byte*)&data, 4);
 }
 
@@ -229,5 +219,15 @@ void JC_EEPROM::writeChars(unsigned int address, char *data, int length) {
 	write(address, (byte*)data, length);
 }
 
+
+void JC_EEPROM::erase(int length) {
+    timber.print("Очистка EEPROM ");
+    for(int i = 0; i< length; i++){
+       write(i, 0xFF);
+       if (i % 128 == 0) timber.print(".");
+    }
+    timber.print(" OK\n");
+    
+}
 
 

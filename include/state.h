@@ -9,7 +9,15 @@
 #include <JC_EEPROM.h> // https://github.com/JChristensen/JC_EEPROM
 #include <Wire.h>      // https://arduino.cc/en/Reference/Wire
 
+#include "Timber.h"
+
+extern Timber timber;
+
 extern JC_EEPROM eep;
+
+static constexpr uint32_t MAGIC = 0x12345678;
+static constexpr int HEADER_ADDR_OFFSET = 0;
+static constexpr int VALUE_ADDR_OFFSET = 4;
 
 // Вспомогательный трейт для определения, поддерживается ли тип в EEPROM
 template <typename T>
@@ -87,13 +95,14 @@ public:
 
     void init(T defaultValue)
     {
-        uint32_t magic = 0;
-        eep.read(base_addr + HEADER_ADDR_OFFSET, (uint8_t *)&magic, sizeof(magic));
+        uint32_t magic = eep.readInt(base_addr);
 
         if (magic != MAGIC)
         {
+            timber.i("init !Magic создаем поле в EEPROM");
             // Первый запуск — записываем магию и значение
-            eep.write(base_addr + HEADER_ADDR_OFFSET, (uint8_t *)&MAGIC, sizeof(MAGIC));
+            eep.writeInt(base_addr, MAGIC);
+            this->save();
             this->set(defaultValue); // Это вызовет запись в VALUE_ADDR
         }
         else
@@ -106,24 +115,20 @@ public:
     {
         if (base_addr == -1)
             return;
-        EEPROM_Traits<T>::write(eep, base_addr, value);
+        EEPROM_Traits<T>::write(eep, base_addr+VALUE_ADDR_OFFSET, value);
     }
 
     void load()
     {
         if (base_addr == -1)
             return;
-        set(EEPROM_Traits<T>::read(eep, base_addr));
+        set(EEPROM_Traits<T>::read(eep, base_addr+VALUE_ADDR_OFFSET));
     }
 
 private:
     int base_addr;
     T value;
     std::vector<std::function<void(T)>> observers;
-
-    static constexpr uint32_t MAGIC = 0x12345678;
-    static constexpr int HEADER_ADDR_OFFSET = 0;
-    static constexpr int VALUE_ADDR_OFFSET = 4;
 };
 
 #endif

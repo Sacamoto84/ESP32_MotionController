@@ -120,6 +120,8 @@ public:
     double readDouble(unsigned int address);
     void readChars(unsigned int address, char *data, int n);
 
+    void erase(int length);
+    
 private:
     uint8_t m_eepromAddr;     // eeprom i2c address
     uint16_t m_dvcCapacity;   // capacity of one EEPROM device, in kbits

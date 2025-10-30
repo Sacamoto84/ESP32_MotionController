@@ -7,7 +7,7 @@ void vibroAngleObserver(){
 
     vibroAngle.addObserver([](float value) {
          timber.i("Observer: vibroAngle изменен %f", value);
-         db.set(kk::_vibroAngle, value);
+         vibroAngle.save();
      });
 
 }

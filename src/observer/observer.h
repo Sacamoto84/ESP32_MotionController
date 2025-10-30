@@ -7,8 +7,6 @@
 
 #include "global.h"
 
-extern GyverDBFile db;
-
 extern void tmcStepperTargetObserver();
 extern void tmcStepperMaxSpeedObserver();
 extern void tmcStepperEnableObserver();

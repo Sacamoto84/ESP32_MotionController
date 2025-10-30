@@ -47,8 +47,6 @@ extern void initTaskDb();
 
 bool shaft = false;
 
-GyverDBFile db;
-
 // esp8266/esp32
 //  IRAM_ATTR void isr() {
 //      eb.tickISR();
@@ -96,8 +94,7 @@ void setup()
     if (!LittleFS.begin(true))
         timber.e("Ошибка при монтировании LittleFS");
 
-    db.setFS(&LittleFS, "/data.db");
-
+   
     uint8_t eepStatus = eep.begin(JC_EEPROM::twiClock100kHz); // go fast!
 
     // 0: success.
@@ -138,52 +135,34 @@ void setup()
         break;
     }
 
-    eepromDump(0, 32);
-    eep.writeInt(0, 0x1234);
-    eep.writeFloat(2, 1.2F);
-    eepromDump(0, 32);
-    int temp = eep.readInt(0);
-    timber.println("read Int = 0x%x", temp);
-    timber.println("read Float = 0x%f", eep.readFloat(2));
+    //timber.println("Очистка");
+    //eep.erase(4096);
+    //eepromDump(0, 0x48);
+    // int temp = eep.readInt(0);
+    // timber.println("read Int = 0x%x", temp);
+    // timber.println("read Float = 0x%f", eep.readFloat(2));
 
     // eep.write(0, 10);
 
-    // запуск и инициализация полей БД
-    const bool res = db.begin();
+    timber.i("------------ init ----------------");
 
-    if (!res)
-        timber.e("Ошибка открытия базы");
+    tmcStepperEnable.init(0);
+    tmcDriverChop.init(0);
+    tmcDriverCurrent.init(1000);
+    tmcDriverMicrostep.init(16); // Микрошаг
+    tmcInterpolation.init(0);
+    tmcStepperMaxSpeed.init(2000);
+    tmcStepperTarget.init(10);
+    vibroFr.init(10.0f);
+    vibroAngle.init(10.0f);
 
-    else
-        timber.i("База на диске");
-    db.dump(Serial2);
-    timber.i("--------------------------------");
-    
-    db.init(kk::_tmcDriverEnable, 0);
-    db.init(kk::_tmcDriverChop, 0);
-    db.init(kk::_tmcDriverCurrent, 1000);
-    db.init(kk::_tmcDriverMicrostep, 16); // Микрошаг
-    db.init(kk::_tmcDriverInterpolation, 0);
-    db.init(kk::_tmcStepperMaxSpeed, 2000);
-    db.init(kk::_tmcStepperSetTarget, 10);
-    db.init(kk::_vibroFr, 10.0f);
-    db.init(kk::_vibroAngle, 10.0f);
+    eepromDump(0, 256);
 
     timber.i("DEBUG: DB init values - MaxSpeed: %d, Target: %d, VibroFr: %.2f, VibroAngle: %.2f",
-             db.get(kk::_tmcStepperMaxSpeed), db.get(kk::_tmcStepperSetTarget),
-             db.get(kk::_vibroFr), db.get(kk::_vibroAngle));
+             tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
+             vibroFr.get(), vibroAngle.get());
 
     observerAll();
-
-    tmcDriverChop.set(db.get(kk::_tmcDriverChop));
-    tmcDriverMicrostep.set(db.get(kk::_tmcDriverMicrostep));
-    tmcInterpolation.set(db.get(kk::_tmcDriverInterpolation));
-    tmcStepperMaxSpeed.set(db.get(kk::_tmcStepperMaxSpeed));
-    tmcStepperTarget.set(db.get(kk::_tmcStepperSetTarget));
-    vibroAngle.set(db.get(kk::_vibroAngle));
-    vibroFr.set(db.get(kk::_vibroFr));
-    tmcDriverCurrent.set(db.get(kk::_tmcDriverCurrent));
-    tmcStepperEnable.set(db.get(kk::_tmcDriverEnable));
 
     // Создаем таймер
     timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
@@ -323,7 +302,7 @@ TaskHandle_t TaskDb;
 {
     for (;;)
     {
-        db.tick();
+        //db.tick();
         delay(1000);
     }
 }

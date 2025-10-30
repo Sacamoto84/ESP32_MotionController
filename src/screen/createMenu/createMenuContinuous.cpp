@@ -24,6 +24,10 @@ void createMenuContinuous()
     });
     //////////////////////////////////
     addMenuElementButton(&menuContinuous, "Перезагрузка",[](int){ esp_restart(); });
+    addMenuElementButton(&menuContinuous, "Очистка EEPROM",[](int){
+         eep.erase(4096);
+         eepromDump(0, 4096); 
+    });
     //////////////////////////////////
     menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
     menuContinuous.ITEMS_WINDOW = 6;
