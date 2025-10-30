@@ -11,6 +11,33 @@
 
 extern JC_EEPROM eep;
 
+// Вспомогательный трейт для определения, поддерживается ли тип в EEPROM
+template <typename T>
+struct EEPROM_Traits
+{
+    static constexpr bool supported = false;
+};
+
+// Специализация для int32_t
+template <>
+struct EEPROM_Traits<int32_t>
+{
+    static constexpr bool supported = true;
+    static void write(JC_EEPROM &e, int addr, int32_t value) { e.writeInt(addr, value); }
+    static int32_t read(JC_EEPROM &e, int addr) { return e.readInt(addr); }
+    static constexpr size_t size = 4;
+};
+
+// Специализация для float
+template <>
+struct EEPROM_Traits<float>
+{
+    static constexpr bool supported = true;
+    static void write(JC_EEPROM &e, int addr, float value) { e.writeFloat(addr, value); }
+    static float read(JC_EEPROM &e, int addr) { return e.readFloat(addr); }
+    static constexpr size_t size = 4;
+};
+
 // Класс для хранения состояния с поддержкой наблюдателей
 template <typename T>
 class State
@@ -18,13 +45,13 @@ class State
 public:
     // Конструктор для инициализации состояния
     explicit State(T initialValue)
-        : value(initialValue), EEPROM_ADDR(-1)
+        : value(initialValue), base_addr(-1)
     {
     }
 
     // Конструктор с EEPROM-адресом
     State(T initialValue, int addr)
-        : value(initialValue), EEPROM_ADDR(addr)
+        : value(initialValue), base_addr(addr)
     {
     }
 
@@ -56,39 +83,47 @@ public:
         }
     }
 
-    int readFromEEPROM()
+    //--------------------------------
+
+    void init(T defaultValue)
     {
-        if (addr == -1)
-            return;
-        set(eep.readInt(EEPROM_ADDR));
+        uint32_t magic = 0;
+        eep.read(base_addr + HEADER_ADDR_OFFSET, (uint8_t *)&magic, sizeof(magic));
+
+        if (magic != MAGIC)
+        {
+            // Первый запуск — записываем магию и значение
+            eep.write(base_addr + HEADER_ADDR_OFFSET, (uint8_t *)&MAGIC, sizeof(MAGIC));
+            this->set(defaultValue); // Это вызовет запись в VALUE_ADDR
+        }
+        else
+        {
+            this->load(); // Загружаем значение
+        }
     }
 
-    float readFromEEPROM()
+    void save()
     {
-        if (addr == -1)
+        if (base_addr == -1)
             return;
-        set(eep.readFloat(EEPROM_ADDR));
-    }
-    
-    void saveToEEPROM(int addr, int32_t value)
-    {
-        if (addr == -1)
-            return;
-        eep.writeInt(addr, value);
+        EEPROM_Traits<T>::write(eep, base_addr, value);
     }
 
-    void saveToEEPROM(int addr, float value)
+    void load()
     {
-        if (addr == -1)
+        if (base_addr == -1)
             return;
-        eep.writeFloat(addr, value);
+        set(EEPROM_Traits<T>::read(eep, base_addr));
     }
-
-    int EEPROM_ADDR;
 
 private:
+    int base_addr;
     T value;
     std::vector<std::function<void(T)>> observers;
+
+    static constexpr uint32_t MAGIC = 0x12345678;
+    static constexpr int HEADER_ADDR_OFFSET = 0;
+    static constexpr int VALUE_ADDR_OFFSET = 4;
 };
 
 #endif
