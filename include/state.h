@@ -102,27 +102,31 @@ public:
             timber.i("init !Magic создаем поле в EEPROM");
             // Первый запуск — записываем магию и значение
             eep.writeInt(base_addr, MAGIC);
+            value = defaultValue;
             this->save();
-            this->set(defaultValue); // Это вызовет запись в VALUE_ADDR
+            notifyObservers();
         }
         else
         {
             this->load(); // Загружаем значение
+            notifyObservers();
         }
     }
 
+    // Сохранить текущий value в EEPROM
     void save()
     {
         if (base_addr == -1)
             return;
-        EEPROM_Traits<T>::write(eep, base_addr+VALUE_ADDR_OFFSET, value);
+        EEPROM_Traits<T>::write(eep, base_addr + VALUE_ADDR_OFFSET, value);
     }
 
+    // Прочитать значение из  EEPROM и поместить в value
     void load()
     {
         if (base_addr == -1)
             return;
-        set(EEPROM_Traits<T>::read(eep, base_addr+VALUE_ADDR_OFFSET));
+        value = EEPROM_Traits<T>::read(eep, base_addr + VALUE_ADDR_OFFSET);
     }
 
 private:

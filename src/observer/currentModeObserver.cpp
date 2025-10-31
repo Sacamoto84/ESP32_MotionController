@@ -7,7 +7,8 @@ void currentModeObserver(){
 
     currentMode.addObserver([](WorkMode value) {
 
-         timber.i("Observer: currentMode изменен");
+         timber.i("!!! Observer: currentMode изменен");
+
 
 
          //db.set(kk::_vibroAngle, value);

@@ -64,20 +64,20 @@ void IRAM_ATTR onTimer()
 {
     // state = !state; // Переключаем состояние
 
-    // static uint32_t tickCount = 0;
-    // tickCount++;
-    // if (tickCount % 1000 == 0)
-    // {
-    //     timber.i("DEBUG: onTimer tick count = %d", tickCount);
-    // }
-    // stepper.tick();
+    //static uint32_t tickCount = 0;
+    //tickCount++;
+    //if (tickCount % 1000 == 0)
+    //{
+        //timber.i("DEBUG: onTimer tick count = %d", tickCount);
+    //}
+    stepper.tick();
 }
 
 void setup()
 {
     esp_task_wdt_init(30, false);
     Serial.begin(115200);
-    Serial2.begin(2000000);
+    Serial2.begin(1000000);
 
     Timber::clear();
     timber.i("--------------------------------");
@@ -146,6 +146,8 @@ void setup()
 
     timber.i("------------ init ----------------");
 
+    observerAll();
+
     tmcStepperEnable.init(0);
     tmcDriverChop.init(0);
     tmcDriverCurrent.init(1000);
@@ -162,10 +164,10 @@ void setup()
              tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
              vibroFr.get(), vibroAngle.get());
 
-    observerAll();
+ 
 
     // Создаем таймер
-    timer = timerBegin(0, 80, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
+    timer = timerBegin(0, 800, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, 1000000 / (FREQUENCY * 2), true); // Половина периода
     timerAlarmEnable(timer);
@@ -212,17 +214,17 @@ void IRAM_ATTR vibro()
 {
     //
     const float stepI = 1.8f / static_cast<float>(tmcDriverMicrostep.get()); // Угол поворота на один шаг
-    timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
+    //timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
     const float a = (vibroAngle.get() / stepI);
     vibroTarget = static_cast<int32_t>(a);
-    timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
+    //timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
     //
 
     if (stepper.ready())
     {
         vibroDir = !vibroDir; // разворачиваем
         int32_t target = vibroDir * vibroTarget;
-        timber.i("DEBUG: vibroDir = %d, setting target = %d", vibroDir, target);
+        //timber.i("DEBUG: vibroDir = %d, setting target = %d", vibroDir, target);
         stepper.setTarget(target); // едем в другую сторону
     }
 }
@@ -309,12 +311,13 @@ TaskHandle_t TaskDb;
 
 void initTaskDb()
 {
-    xTaskCreatePinnedToCore(
-        TaskDbLoop,   /* Функция для задачи */
-        "TaskDbLoop", /* Имя задачи */
-        20000,        /* Размер стека */
-        nullptr,      /* Параметр задачи */
-        5,            /* Приоритет */
-        &TaskDb,      /* Выполняемая операция */
-        0);           /* Номер ядра, на котором она должна выполняться */
+    // xTaskCreatePinnedToCore(
+    //     TaskDbLoop,   /* Функция для задачи */
+    //     "TaskDbLoop", /* Имя задачи */
+    //     20000,        /* Размер стека */
+    //     nullptr,      /* Параметр задачи */
+    //     5,            /* Приоритет */
+    //     &TaskDb,      /* Выполняемая операция */
+    //     0);           /* Номер ядра, на котором она должна выполняться */
+
 }
