@@ -1,6 +1,7 @@
 #include "observer.h"
 
 void observerAll(){
+    
     tmcStepperTargetObserver();
     tmcStepperMaxSpeedObserver();
     tmcStepperEnableObserver();

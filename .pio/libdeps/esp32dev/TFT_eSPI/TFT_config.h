@@ -27,9 +27,9 @@
 **                         Others
 ***************************************************************************************/
 
-//#ifdef CONFIG_DISABLE_WARNINGS
+#ifdef CONFIG_DISABLE_WARNINGS
     #define DISABLE_ALL_LIBRARY_WARNINGS
-//#endif
+#endif
 
 /***************************************************************************************
 **                         TFT_eSPI Configuration defines
