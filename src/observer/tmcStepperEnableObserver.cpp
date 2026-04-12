@@ -1,0 +1,11 @@
+#include "observer.h"
+
+void tmcStepperEnableObserver(){
+
+    tmcStepperEnable.addObserver([](int32_t value) {
+        timber.i("Observer: tmcDriverEnable изменен %d", value);
+        if (value) stepper.enable(); else stepper.disable();
+        tmcStepperEnable.save();
+    });
+
+}
