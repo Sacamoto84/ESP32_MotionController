@@ -58,7 +58,7 @@ hw_timer_t *timer = nullptr;
 
 // volatile bool state = false;
 
-bool dir = 1;
+uint8_t dir = 1;
 
 void IRAM_ATTR onTimer()
 {
@@ -165,14 +165,10 @@ void setup()
              tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
              vibroFr.get(), vibroAngle.get());
 
- 
-
     // Создаем таймер
     timer = timerBegin(10000); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
     timerAttachInterrupt(timer, &onTimer);
-    timerStart(timber);
-    //timerAlarmWrite(timer, 1000000 / (FREQUENCY * 2), true); // Половина периода
-    //timerAlarmEnable(timer);
+    timerStart(timer);
 
     lcdInit();
 
