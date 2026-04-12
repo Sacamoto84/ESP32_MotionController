@@ -75,7 +75,8 @@ void IRAM_ATTR onTimer()
 
 void setup()
 {
-    esp_task_wdt_init(30, false);
+   /////////// esp_task_wdt_init(30, false);
+
     Serial.begin(115200);
     Serial2.begin(1000000);
 
@@ -167,10 +168,11 @@ void setup()
  
 
     // Создаем таймер
-    timer = timerBegin(0, 800, true); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
-    timerAttachInterrupt(timer, &onTimer, true);
-    timerAlarmWrite(timer, 1000000 / (FREQUENCY * 2), true); // Половина периода
-    timerAlarmEnable(timer);
+    timer = timerBegin(10000); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
+    timerAttachInterrupt(timer, &onTimer);
+    timerStart(timber);
+    //timerAlarmWrite(timer, 1000000 / (FREQUENCY * 2), true); // Половина периода
+    //timerAlarmEnable(timer);
 
     lcdInit();
 
@@ -216,7 +218,7 @@ void IRAM_ATTR vibro()
     const float stepI = 1.8f / static_cast<float>(tmcDriverMicrostep.get()); // Угол поворота на один шаг
     //timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
     const float a = (vibroAngle.get() / stepI);
-    vibroTarget = static_cast<int32_t>(a);
+    vibroTarget = static_cast<int>(a);
     //timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
     //
 

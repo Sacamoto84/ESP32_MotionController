@@ -17,7 +17,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
     void onWrite(BLECharacteristic *pCharacteristic) override
     {
-        std::string value = pCharacteristic->getValue();
+        String value = pCharacteristic->getValue();
 
         if (value.length() > 0)
         {
