@@ -52,7 +52,7 @@ JC_EEPROM::JC_EEPROM(eeprom_size_t deviceCapacity, uint8_t nDevice, uint16_t pag
 // calls for the other devices to ensure the intended I2C clock speed is set.
 uint8_t JC_EEPROM::begin(twiClockFreq_t twiFreq)
 {
-    Wire.begin(22, 21);
+    Wire.begin(8, 9);
     Wire.setClock(twiFreq);
     Wire.beginTransmission(m_eepromAddr);
     if (m_nAddrBytes == 2) Wire.write(0);   // high addr byte

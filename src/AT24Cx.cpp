@@ -89,9 +89,10 @@ AT24C512::AT24C512(byte index) {
  * Init
  */
 void AT24CX::init(byte index, byte pageSize) {
+	return;
 	_id = AT24CX_ID | (index & 0x7);
 	_pageSize = pageSize;
-	Wire.begin(22, 21);
+	Wire.begin(8, 9);
 	Wire.setClock(100000);
 }
 
@@ -99,6 +100,7 @@ void AT24CX::init(byte index, byte pageSize) {
  * Write byte
  */
 void AT24CX::write(unsigned int address, byte data) {
+	return;
     Wire.beginTransmission(_id);
     if(Wire.endTransmission()==0) {
     	Wire.beginTransmission(_id);

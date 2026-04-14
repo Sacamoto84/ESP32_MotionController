@@ -1,8 +1,8 @@
 #include <EncButton.h>
 
-#define BTN 19
-#define ENC0 34
-#define ENC1 35
+#define BTN  4
+#define ENC0 5
+#define ENC1 6
 
 EncButton eb(ENC0, ENC1, BTN);
 

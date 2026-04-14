@@ -23,14 +23,14 @@ public:
     static void resetln() { print("\33[0m\n"); };
 
     static void print(char const *format) {
-        Serial2.write((uint8_t *) format, strlen(format));
+        Serial1.write((uint8_t *) format, strlen(format));
         //HAL_UART_Transmit(huart, ( uint8_t*) format, strlen(format), 1000);
     }
 
     template<typename ... Args>
     void print(char const *const format, Args const &... args) noexcept {
         sprintf(str, format, args ...);
-        Serial2.write((uint8_t *) str, strlen(str));
+        Serial1.write((uint8_t *) str, strlen(str));
         //HAL_UART_Transmit(huart, (uint8_t*) str, strlen(str), 1000);
     }
 
@@ -38,13 +38,13 @@ public:
     void println(char const *const format, Args const &... args) noexcept {
         sprintf(str, format, args ...);
         strcat(str, "\n");
-        Serial2.write((uint8_t *) str, strlen(str));
+        Serial1.write((uint8_t *) str, strlen(str));
         //HAL_UART_Transmit(huart, (uint8_t*) str, strlen(str), 1000);
 
     }
 
     void println(char const *format) {
-        Serial2.write((uint8_t *) format, strlen(format));
+        Serial1.write((uint8_t *) format, strlen(format));
         //HAL_UART_Transmit(huart, ( uint8_t*) format, strlen(format), 1000);
     }
 

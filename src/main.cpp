@@ -78,8 +78,12 @@ void setup()
    /////////// esp_task_wdt_init(30, false);
 
     Serial.begin(115200);
-    Serial2.begin(1000000);
+    Serial1.begin(1000000);
+    
+    lcdInit();
 
+    return;
+    
     Timber::clear();
     timber.i("--------------------------------");
     timber.i("Контроллер шагового мотора V1.0");
@@ -96,7 +100,7 @@ void setup()
         timber.e("Ошибка при монтировании LittleFS");
 
    
-    uint8_t eepStatus = eep.begin(JC_EEPROM::twiClock100kHz); // go fast!
+    uint8_t eepStatus = 0;//eep.begin(JC_EEPROM::twiClock100kHz); // go fast!
 
     // 0: success.
     // 1: data too long to fit in transmit buffer.
@@ -159,7 +163,7 @@ void setup()
     vibroFr.init(10.0f);
     vibroAngle.init(10.0f);
 
-    eepromDump(0, 256);
+    //eepromDump(0, 256);
 
     timber.i("DEBUG: DB init values - MaxSpeed: %d, Target: %d, VibroFr: %.2f, VibroAngle: %.2f",
              tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
@@ -170,30 +174,30 @@ void setup()
     timerAttachInterrupt(timer, &onTimer);
     timerStart(timer);
 
-    lcdInit();
+    //lcdInit();
 
     // eb.setEncISR(true);
 
     uint32_t drv_status = driver.DRV_STATUS();
-    Serial2.print("DRV_STATUS: 0x");
-    Serial2.println(drv_status, HEX);
+    Serial1.print("DRV_STATUS: 0x");
+    Serial1.println(drv_status, HEX);
 
     // driver.en_pwm_mode(true);       // Toggle stealthChop on TMC2130/2160/5130/5160
 
-    Serial2.print("DRV_STATUS=0b");
-    Serial2.println(driver.DRV_STATUS(), BIN);
+    Serial1.print("DRV_STATUS=0b");
+    Serial1.println(driver.DRV_STATUS(), BIN);
 
-    Serial2.print("version: ");
-    Serial2.println(driver.version());
+    Serial1.print("version: ");
+    Serial1.println(driver.version());
 
-    Serial2.print("run status: ");
-    Serial2.println(driver.irun());
+    Serial1.print("run status: ");
+    Serial1.println(driver.irun());
 
-    Serial2.print("run en stat: ");
-    Serial2.println(driver.encb_dcen_cfg4());
+    Serial1.print("run en stat: ");
+    Serial1.println(driver.encb_dcen_cfg4());
 
-    Serial2.print("toff: ");
-    Serial2.println(driver.toff());
+    Serial1.print("toff: ");
+    Serial1.println(driver.toff());
 
     initTaskDb();
 
@@ -231,9 +235,9 @@ void loop()
 {
 
     // Обработка команд CLI
-    if (Serial2.available())
+    if (Serial1.available())
     {
-        String input = Serial2.readStringUntil('\n');
+        String input = Serial1.readStringUntil('\n');
         cli.parse(input);
     }
 
