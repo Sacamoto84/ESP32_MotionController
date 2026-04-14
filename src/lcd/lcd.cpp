@@ -119,12 +119,12 @@ void Screen(screenAction *screen) {
 
     // scrollbar
     float sbPercent = (float) (screen->ITEMS_WINDOW) / (float) screen->ITEMS_COUNT;
-    float sbMaxHeight = 132;                                // Максимальная высота всего скролл бар
+    float sbMaxHeight = 170;                                // Максимальная высота всего скролл бар
     float sbActiveHeight = (float) sbMaxHeight * sbPercent; // Высота активной части
     int sbW = 3;                                            // Ширина
     uint16_t sbColor = White;                               // Цвет активной части
     uint16_t sbColorBg = Black;                             // Цвет фона
-    int sbX = 239 - 3;
+    int sbX = 320 - 3;
     int sbY = 1;
 
     if (eb.turn() || updateLcd || eb.press()) {
@@ -172,7 +172,7 @@ void Screen(screenAction *screen) {
         }
 
         tft.fillScreen(colorBg);
-        tft.drawRect(0, 0, 240, 135, Green);
+        tft.drawRect(0, 0, 320, 170, Green);
 
         tft.setTextColor(WHITE, BLACK);
         tft.setTextColor(White, colorBg);

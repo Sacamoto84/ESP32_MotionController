@@ -30,6 +30,6 @@ void createMenuContinuous()
     });
     //////////////////////////////////
     menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
-    menuContinuous.ITEMS_WINDOW = 6;
+    menuContinuous.ITEMS_WINDOW = 8;
     menuContinuous.indexEndWindow = menuContinuous.ITEMS_WINDOW - 1;
 }
