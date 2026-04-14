@@ -17,12 +17,6 @@
 // #define TFT_INVERSION_ON
 // #define TFT_INVERSION_OFF
 
-// ##################################################################################
-//
-// Section 2. Define the pins that are used to interface with the display here
-//
-// ##################################################################################
-
 // If a backlight control signal is available then define the TFT_BL pin in Section 2
 // below. The backlight will be turned ON when tft.begin() is called, but the library
 // needs to know if the LEDs are ON with the pin HIGH or LOW. If the LEDs are to be
@@ -30,18 +24,7 @@
 // sketch. e.g. with digitalWrite(TFT_BL, LOW);
 
 // #define TFT_BL   32            // LED back-light control pin
-// #define TFT_BACKLIGHT_ON HIGH  // Level to turn ON back-light (HIGH or LOW)
-
-// ###### EDIT THE PIN NUMBERS IN THE LINES FOLLOWING TO SUIT YOUR ESP8266 SETUP ######
-
-
-//#define TFT_BL PIN_D1  // LED back-light (only for ST7789 with backlight control pin)
-
-//#define TOUCH_CS PIN_D2     // Chip select pin (T_CS) of touch screen
-
-//#define TFT_WR PIN_D2       // Write strobe for modified Raspberry Pi TFT only
-
-
+ 
 // ###### EDIT THE PIN NUMBERS IN THE LINES FOLLOWING TO SUIT YOUR ESP32 SETUP   ######
 
 // For ESP32 Dev board (only tested with ILI9341 display)
@@ -51,11 +34,11 @@
 #define TFT_MOSI 11
 #define TFT_SCLK 12
 #define TFT_CS   10  // Chip select control pin
-#define TFT_DC    13  // Data Command control pin
-#define TFT_RST   14  // Reset pin (could connect to RST pin)
+#define TFT_DC   13  // Data Command control pin
+#define TFT_RST  14  // Reset pin (could connect to RST pin)
 //#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
-//#define TFT_BL   32  // LED back-light (required for M5Stack)
-
+#define TFT_BL   38  // LED back-light (required for M5Stack)
+#define TFT_BACKLIGHT_ON HIGH  // Level to turn ON back-light (HIGH or LOW)
 // ##################################################################################
 //
 // Section 3. Define the fonts that are to be used here
@@ -97,7 +80,7 @@
 // #define SPI_FREQUENCY   5000000
 // #define SPI_FREQUENCY  10000000
 // #define SPI_FREQUENCY  20000000
-//#define SPI_FREQUENCY  27000000
+// #define SPI_FREQUENCY  27000000
 // #define SPI_FREQUENCY  40000000
 // #define SPI_FREQUENCY  55000000 // STM32 SPI1 only (SPI2 maximum is 27MHz)
 #define SPI_FREQUENCY  80000000

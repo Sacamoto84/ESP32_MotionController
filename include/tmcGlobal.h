@@ -9,9 +9,9 @@
 #define DIAG1 39
 
 // TMC
-#define EN_PIN    7 // Enable
+#define EN_PIN   16 // Enable
 #define DIR_PIN  15 // Direction
-#define STEP_PIN 16 // Step
+#define STEP_PIN  7 // Step
 
 #define CS_PIN   1  // Chip select
 #define SW_MOSI  2 // Software Master Out Slave In (MOSI)

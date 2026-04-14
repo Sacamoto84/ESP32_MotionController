@@ -19,12 +19,6 @@
 
 extern EncButton eb;
 
-// #define TFT_MISO 19
-// #define TFT_MOSI 23
-// #define TFT_SCLK 18
-// #define TFT_CS   15  // Chip select control pin
-// #define TFT_DC    2  // Data Command control pin
-// #define TFT_RST   4  // Reset pin (could connect to RST pin)
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 
 // uint16 color = ((red>>3)<<11) | ((green>>2)<<5) | (blue>>3);
@@ -32,6 +26,16 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library
 static bool updateLcd = true;
 TaskHandle_t TaskLcd;
 enum CurrenScreen currentScreen = MAIN;
+
+
+// Настройки PWM для подсветки
+const int backlightPin = 38;        // твой пин
+const int pwmChannel   = 0;         // любой канал от 0 до 7 (ESP32-S3 имеет 8 каналов LEDC)
+const int pwmFreq      = 5000;      // 5 кГц — комфортная частота, без мерцания
+const int pwmResolution = 8;        // 8 бит → яркость от 0 до 255
+
+
+
 
 [[noreturn]] void TaskLcdLoop(void *parameter);
 
@@ -56,6 +60,16 @@ void lcdInit() {
     tft.fillScreen(0);
     tft.setTextColor(WHITE, BLACK);
     // tft.drawString("TFT_eSPI example", 30, 30, 2);
+
+    //pinMode(38, OUTPUT);
+    //digitalWrite(38, HIGH);
+
+    ledcAttach(38, 5000, 8);   // пин, частота (Гц), разрешение (бит)
+    ledcWrite(38, 200);
+
+    // Настраиваем PWM на пине 38
+    //ledcSetup(pwmChannel, pwmFreq, pwmResolution);
+    //ledcAttachPin(backlightPin, pwmChannel);
 
     tft.loadFont(AA_FONT_SMALL); // Must load the font first
 
