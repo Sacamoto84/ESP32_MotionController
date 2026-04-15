@@ -9,7 +9,6 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
-#include <BLE2902.h>
 #include <BLEClient.h>
 #include <SimpleCLI.h>
 #include "tmcGlobal.h"

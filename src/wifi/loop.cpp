@@ -23,17 +23,17 @@ TaskHandle_t Task1;
 
 void onWsEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
-        Serial2.printf("Client #%" PRIu32 " connected.\n", client->id());
+        timber.i("Client #%" PRIu32 " connected.", client->id());
     } else if (type == WS_EVT_DISCONNECT) {
-        Serial2.printf("Client #%" PRIu32 " disconnected.\n", client->id());
+        timber.i("Client #%" PRIu32 " disconnected.", client->id());
     } else if (type == WS_EVT_ERROR) {
-        Serial2.printf("Client #%" PRIu32 " error.\n", client->id());
+        timber.i("Client #%" PRIu32 " error.", client->id());
     } else if (type == WS_EVT_DATA) {
-        Serial2.printf("Client #%" PRIu32 " len: %u\n", client->id(), len);
+        timber.i("Client #%" PRIu32 " len: %u", client->id(), len);
     } else if (type == WS_EVT_PONG) {
-        Serial2.printf("Client #%" PRIu32 " pong.\n", client->id());
+        timber.i("Client #%" PRIu32 " pong.", client->id());
     } else if (type == WS_EVT_PING) {
-        Serial2.printf("Client #%" PRIu32 " ping.\n", client->id());
+        timber.i("Client #%" PRIu32 " ping.", client->id());
     }
 }
 

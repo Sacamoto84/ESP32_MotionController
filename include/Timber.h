@@ -22,16 +22,14 @@ public:
 
     static void resetln() { print("\33[0m\n"); };
 
-    static void print(char const *format) {
-        Serial1.write((uint8_t *) format, strlen(format));
-        //HAL_UART_Transmit(huart, ( uint8_t*) format, strlen(format), 1000);
-    }
+    static void print(char const *format) { Serial1.write((uint8_t *) format, strlen(format)); }
+    static void print(const String &format) { Serial1.write(format.c_str()); }
+    static void print(const StringSumHelper &format) { Serial1.write(format.c_str()); }
 
     template<typename ... Args>
     void print(char const *const format, Args const &... args) noexcept {
         sprintf(str, format, args ...);
         Serial1.write((uint8_t *) str, strlen(str));
-        //HAL_UART_Transmit(huart, (uint8_t*) str, strlen(str), 1000);
     }
 
     template<typename ... Args>
@@ -39,13 +37,26 @@ public:
         sprintf(str, format, args ...);
         strcat(str, "\n");
         Serial1.write((uint8_t *) str, strlen(str));
-        //HAL_UART_Transmit(huart, (uint8_t*) str, strlen(str), 1000);
-
     }
 
     void println(char const *format) {
         Serial1.write((uint8_t *) format, strlen(format));
-        //HAL_UART_Transmit(huart, ( uint8_t*) format, strlen(format), 1000);
+        Serial1.write('\n');
+    }
+
+    void println(const String &format) {
+        Serial1.write(format.c_str());
+        Serial1.write('\n');
+    }
+
+    void println(const StringSumHelper &format) {
+        Serial1.write(format.c_str());
+        Serial1.write('\n');
+    }
+
+    void println(String *format) {
+        Serial1.write(format->c_str());
+        Serial1.write('\n');
     }
 
     template<typename ... Args>
@@ -79,6 +90,7 @@ public:
     void e(char const *const format) { colorStringln(9, format); }
 
     void i(char const *const format) { colorStringln(45, format); }
+    void i(const String &format)     { Serial1.write(format.c_str()); }
 
     void s(char const *const format) { colorStringln(10, format); }
 

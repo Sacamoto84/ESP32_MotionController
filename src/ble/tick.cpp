@@ -10,8 +10,8 @@ void Ble::tick(void)
         pCharacteristic->setValue(buf20, 4); // Устанавливаем новое значение
         //pCharacteristic->notify();           // Отправляем уведомление
 
-        // Serial2.println("Data sent: ");    // Лог для отладки
-        // Serial2.println("Data sent: " + data);   // Лог для отладки
+        // timber.i.println("Data sent: ");    // Лог для отладки
+        // timber.i.println("Data sent: " + data);   // Лог для отладки
         delay(50); // Задержка
     }
     delay(100);

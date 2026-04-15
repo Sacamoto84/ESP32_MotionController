@@ -6,7 +6,7 @@ void createMenuConfig()
     itemAction actions;
 
     addMenuElementButton(&menuConfig, "<- Назад",[](int){
-        Serial2.println("<- Назад"); currentScreen = MAIN; update(); });
+        timber.i("<- Назад"); currentScreen = MAIN; update(); });
     addMenuElementSwitch(&menuConfig, "Мотор: Вкл", "Мотор: Выкл", &tmcStepperEnable);
     addMenuElementSwitch(&menuConfig, "Режим: StealthChop", "Режим: SpreadCycle", &tmcDriverChop);
     addMenuElementEDITINT(&menuConfig, "Ток: ", " мА", &tmcDriverCurrent,100, 3100, 100);

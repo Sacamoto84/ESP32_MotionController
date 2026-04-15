@@ -27,7 +27,7 @@ void createMenuVibro()
 
     ///////////////////////////////////
     addMenuElementButton(&menuVibro, "Настройка",[](int){
-       Serial2.println("Нажата кнопка: Настройка");
+       timber.i("Нажата кнопка: Настройка");
        currentScreen = CONFIG;
        update();
     });

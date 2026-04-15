@@ -147,7 +147,7 @@ void Screen(screenAction *screen) {
                     if (screen->indexStartWindow < 0) screen->indexStartWindow = 0;
                 }
 
-                Serial2.printf("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
+                timber.i("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
             }
 
             if (eb.left()) {
@@ -167,7 +167,7 @@ void Screen(screenAction *screen) {
                     screen->indexEndWindow = screen->line + screen->ITEMS_WINDOW - 1;
                 }
 
-                Serial2.printf("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
+                timber.i("S:%d E:%d L:%d\n", screen->indexStartWindow, screen->indexEndWindow, screen->line);
             }
         }
 

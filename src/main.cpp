@@ -10,7 +10,6 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
-#include <BLE2902.h>
 #include <BLEClient.h>
 
 #include <esp_task_wdt.h>
@@ -273,7 +272,7 @@ void loop()
     //  // выбор переменной для изменения
     //   if (eb.hasClicks()) {
     //       select1 = eb.getClicks();
-    //       Serial2.println(String("Select: ") + select1);
+    //       timber.i.println(String("Select: ") + select1);
     //   }
 
     //   if (eb.turn()) {
@@ -292,7 +291,7 @@ void loop()
     //               var3 += (eb.fast() ? 5 : 1) * eb.dir();
     //               break;
     //       }
-    //       Serial2.println(String("vars ") + var1 + ',' + var2 + ',' + var3);
+    //       timber.i.println(String("vars ") + var1 + ',' + var2 + ',' + var3);
     //   }
 
     //}

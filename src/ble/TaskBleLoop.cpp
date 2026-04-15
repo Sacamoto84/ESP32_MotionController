@@ -1,6 +1,6 @@
 
-#include "ble/MyCallbacks.h"
-#include "ble/MyServerCallbacks.h"
+#include "ble/MyCallbacksFixed.h"
+#include "ble/MyServerCallbacksFixed.h"
 #include "ble.h"
 
 /**
@@ -18,7 +18,6 @@ void Ble::TaskBleLoop(void *parameter)
   pCharacteristic = pService->createCharacteristic("00002a37-0000-1000-8000-00805f9b34fb",
                                                    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY);
 
-  pCharacteristic->addDescriptor(new BLE2902());
   pCharacteristic->setCallbacks(new MyCallbacks());
 
   pService->start();
@@ -34,6 +33,5 @@ void Ble::TaskBleLoop(void *parameter)
     tick();
   }
 }
-
 
 

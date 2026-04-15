@@ -16,15 +16,15 @@ void printBits(uint32_t value)
 {
     for (int i = 31; i >= 0; --i)
     { // 31-й бит - старший
-        Serial2.printf("%c", (value & (1U << i)) ? '1' : '0');
+        timber.i("%c", (value & (1U << i)) ? '1' : '0');
     }
-    Serial2.printf("\n");
+    timber.i("\n");
 }
 
 void resetCallback(cmd *c)
 {
     Command cmd(c);
-    Serial2.println("Перезагрузка");
+    timber.i("Перезагрузка");
     esp_restart();
 }
 
@@ -36,13 +36,13 @@ void enableCallback(cmd *c)
     if (argVal == "on")
     {
         tmcStepperEnable.set(1);
-        Serial2.println("Включить мотор");
+        timber.i("Включить мотор");
         update();
     }
     else
     {
         tmcStepperEnable.set(0);
-        Serial2.println("Выключить мотор");
+        timber.i("Выключить мотор");
         update();
     }
 }
@@ -50,30 +50,30 @@ void enableCallback(cmd *c)
 void errorCallback(cmd_error *errorPtr)
 {
     CommandError e(errorPtr);
-    Serial2.println("ERROR: " + e.toString());
+    timber.i("ERROR: %s", e.toString().c_str());
     if (e.hasCommand())
     {
-        Serial2.println("Did you mean? " + e.getCommand().toString());
+        timber.println("Did you mean? " + e.getCommand().toString());
     }
     else
     {
-        Serial2.println(cli.toString());
+        timber.println(cli.toString());
     }
 }
 
 void readGSONCallback(cmd *c)
 {
     Command cmd(c);
-    Serial2.print("Прочесть GCONF:");
+    timber.i("Прочесть GCONF:");
     printBits(driver.GCONF());
 
-    Serial2.print("Прочесть MSCNT:");
+    timber.i("Прочесть MSCNT:");
     printBits(driver.MSCNT());
 
-    Serial2.print("Прочесть CHOPCONF:");
+    timber.i("Прочесть CHOPCONF:");
     printBits(driver.CHOPCONF());
 
-    Serial2.print("Прочесть DRV_STATUS:");
+    timber.i("Прочесть DRV_STATUS:");
     printBits(driver.DRV_STATUS());
 
 }
@@ -97,7 +97,7 @@ void pingCallback(cmd *cmdPtr)
 
     for (int i = 0; i < n; i++)
     {
-        Serial2.println(strVal);
+        timber.i(strVal.c_str());
     }
 }
 

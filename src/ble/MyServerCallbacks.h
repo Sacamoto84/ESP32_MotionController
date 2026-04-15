@@ -19,13 +19,13 @@ public:
     {
         *deviceConnected = true;
         BLEDevice::startAdvertising();
-        Serial2.println("BLE подключен");
+        timber.i.println("BLE подключен");
     }
 
     void onDisconnect(BLEServer* pServer) override
     {
         *deviceConnected = false;
-        Serial2.println("BLE отключен");
+        timber.i.println("BLE отключен");
     }
 
 private:
