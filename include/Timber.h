@@ -29,34 +29,34 @@ public:
     template<typename ... Args>
     void print(char const *const format, Args const &... args) noexcept {
         sprintf(str, format, args ...);
-        Serial1.write((uint8_t *) str, strlen(str));
+        Serial.write((uint8_t *) str, strlen(str));
     }
 
     template<typename ... Args>
     void println(char const *const format, Args const &... args) noexcept {
         sprintf(str, format, args ...);
         strcat(str, "\n");
-        Serial1.write((uint8_t *) str, strlen(str));
+        Serial.write((uint8_t *) str, strlen(str));
     }
 
     void println(char const *format) {
-        Serial1.write((uint8_t *) format, strlen(format));
-        Serial1.write('\n');
+        Serial.write((uint8_t *) format, strlen(format));
+        Serial.write('\n');
     }
 
     void println(const String &format) {
-        Serial1.write(format.c_str());
-        Serial1.write('\n');
+        Serial.write(format.c_str());
+        Serial.write('\n');
     }
 
     void println(const StringSumHelper &format) {
-        Serial1.write(format.c_str());
-        Serial1.write('\n');
+        Serial.write(format.c_str());
+        Serial.write('\n');
     }
 
     void println(String *format) {
-        Serial1.write(format->c_str());
-        Serial1.write('\n');
+        Serial.write(format->c_str());
+        Serial.write('\n');
     }
 
     template<typename ... Args>

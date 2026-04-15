@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+#include <WiFi.h>
+#include <ArduinoOTA.h>
+
 #include "FS.h"
 #include "LITTLEFS.h"
 
@@ -59,6 +62,11 @@ hw_timer_t *timer = nullptr;
 
 uint8_t dir = 1;
 
+
+const char* WIFI_SSID = "TP-Link_BC0C";
+const char* WIFI_PASS = "58133514";
+
+
 void IRAM_ATTR onTimer()
 {
     // state = !state; // Переключаем состояние
@@ -72,18 +80,53 @@ void IRAM_ATTR onTimer()
     stepper.tick();
 }
 
+
+void setupOTA() {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        delay(3000);
+        ESP.restart();
+    }
+
+    ArduinoOTA.setHostname("my-esp32s3");
+    ArduinoOTA.setPassword("123456");
+    // ArduinoOTA.setPort(3232);   // можно не задавать, это и так default для ESP32
+
+    ArduinoOTA.onStart([]() {
+        Serial.println("OTA Start");
+    });
+
+    ArduinoOTA.onEnd([]() {
+        Serial.println("\nOTA End");
+    });
+
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+        Serial.printf("OTA Progress: %u%%\r", (progress * 100) / total);
+    });
+
+    ArduinoOTA.onError([](ota_error_t error) {
+        Serial.printf("OTA Error[%u]\n", error);
+    });
+
+    ArduinoOTA.begin();
+
+    Serial.print("WiFi IP: ");
+    Serial.println(WiFi.localIP());
+}
+
+
 void setup()
 {
    /////////// esp_task_wdt_init(30, false);
 
-    Serial.begin(115200);
-    Serial1.begin(1000000);
-    
+    Serial.begin (1000000);
+  
     lcdInit();
 
-    return;
-    
     Timber::clear();
+
     timber.i("--------------------------------");
     timber.i("Контроллер шагового мотора V1.0");
     timber.w("Ворнинг");
@@ -95,8 +138,7 @@ void setup()
     tmcInit();
     cliInit();
 
-    if (!LittleFS.begin(true))
-        timber.e("Ошибка при монтировании LittleFS");
+    if (!LittleFS.begin(true)) timber.e("Ошибка при монтировании LittleFS");
 
    
     uint8_t eepStatus = 0;//eep.begin(JC_EEPROM::twiClock100kHz); // go fast!
@@ -178,25 +220,25 @@ void setup()
     // eb.setEncISR(true);
 
     uint32_t drv_status = driver.DRV_STATUS();
-    Serial1.print("DRV_STATUS: 0x");
-    Serial1.println(drv_status, HEX);
+    Serial.print("DRV_STATUS: 0x");
+    Serial.println(drv_status, HEX);
 
     // driver.en_pwm_mode(true);       // Toggle stealthChop on TMC2130/2160/5130/5160
 
-    Serial1.print("DRV_STATUS=0b");
-    Serial1.println(driver.DRV_STATUS(), BIN);
+    Serial.print("DRV_STATUS=0b");
+    Serial.println(driver.DRV_STATUS(), BIN);
 
-    Serial1.print("version: ");
-    Serial1.println(driver.version());
+    Serial.print("version: ");
+    Serial.println(driver.version());
 
-    Serial1.print("run status: ");
-    Serial1.println(driver.irun());
+    Serial.print("run status: ");
+    Serial.println(driver.irun());
 
-    Serial1.print("run en stat: ");
-    Serial1.println(driver.encb_dcen_cfg4());
+    Serial.print("run en stat: ");
+    Serial.println(driver.encb_dcen_cfg4());
 
-    Serial1.print("toff: ");
-    Serial1.println(driver.toff());
+    Serial.print("toff: ");
+    Serial.println(driver.toff());
 
     initTaskDb();
 
@@ -209,6 +251,10 @@ void setup()
 
     // TaskWifiLoop();
     // wifi_loop();
+
+
+    setupOTA();
+
 }
 
 void IRAM_ATTR vibro()
@@ -234,9 +280,9 @@ void loop()
 {
 
     // Обработка команд CLI
-    if (Serial1.available())
+    if (Serial.available())
     {
-        String input = Serial1.readStringUntil('\n');
+        String input = Serial.readStringUntil('\n');
         cli.parse(input);
     }
 

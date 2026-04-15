@@ -69,6 +69,7 @@ struct itemAction
 
 extern EncButton eb;
 extern TFT_eSPI tft;
+extern TFT_eSprite spr;
 
 extern void ITEM(int line, int index, itemAction* item, bool* isSelect, int16_t x, int16_t y);
 extern void Text(const String& text, const int16_t x = 0, const int16_t y = 0, uint16_t colorText = 0,
