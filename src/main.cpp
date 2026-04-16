@@ -1,8 +1,5 @@
 #include <Arduino.h>
 
-#include <WiFi.h>
-#include <ArduinoOTA.h>
-
 #include "FS.h"
 #include "LITTLEFS.h"
 
@@ -10,20 +7,11 @@
 #include <SPI.h>
 #include <TMCStepper.h>
 
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <BLEClient.h>
-
 #include <esp_task_wdt.h>
 
 #include "global.h"
 
 #include <EncButton.h>
-#include <ble/ble.h>
-
-#include <ESPAsyncWebServer.h>
-
 constexpr bool erase{false};        // true writes 0xFF to all addresses,
                                     //   false performs write/read test
 constexpr uint32_t totalKBytes{64}; // for read and write test functions
@@ -34,8 +22,6 @@ extern EncButton eb;
 extern void lcdInit();
 
 extern void encoderInit();
-
-// Ble ble;
 
 extern void initTaskDb();
 
@@ -53,10 +39,6 @@ hw_timer_t *timer = nullptr;
 // volatile bool state = false;
 
 uint8_t dir = 1;
-
-
-const char* WIFI_SSID = "TP-Link_BC0C";
-const char* WIFI_PASS = "58133514";
 
 
 void IRAM_ATTR onTimer()
@@ -82,7 +64,7 @@ void setup()
 
     Timber::clear();
     
-    Serial.println("11111111111111111111");
+    Serial.println("11111111111111111111eeйййй2222");
 
     timber.i("--------------------------------");
     timber.i("Контроллер шагового мотора V1.0");
@@ -150,12 +132,6 @@ void setup()
     // tmcStepperMaxSpeed.set(4000);
     // tmcStepperSetTarget.set(50);
     // stepper.setAcceleration(2000); // ускорение
-
-    // TaskWifiLoop();
-    // wifi_loop();
-
-
-    //setupOTA();
 
 }
 
