@@ -10,10 +10,6 @@
 
 #include <LittleFS.h>
 
-#include <JC_EEPROM.h> // https://github.com/JChristensen/JC_EEPROM
-// #include <Streaming.h>      // https://github.com/janelia-arduino/Streaming
-#include <Wire.h> // https://arduino.cc/en/Reference/Wire
-
 #include "addresses.h"
 
 extern GStepper2<STEPPER2WIRE> stepper;
@@ -48,9 +44,5 @@ extern bool vibroDir;           // Рантайм переменная напр�
 extern int vibroTarget;
 
 extern State<float> constRps; // Скорость оборотов в секунду
-
-extern JC_EEPROM eep;
-
-extern void eepromDump(uint32_t, uint32_t);
 
 #endif // ends #ifndef _TFT_eSPIH_

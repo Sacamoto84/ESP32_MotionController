@@ -90,7 +90,7 @@ public:
     void e(char const *const format) { colorStringln(9, format); }
 
     void i(char const *const format) { colorStringln(45, format); }
-    void i(const String &format)     { Serial1.write(format.c_str()); }
+    void i(const String &format)     { Serial1.print(format); }
 
     void s(char const *const format) { colorStringln(10, format); }
 

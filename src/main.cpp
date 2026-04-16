@@ -24,10 +24,6 @@
 
 #include <ESPAsyncWebServer.h>
 
-#include <JC_EEPROM.h> // https://github.com/JChristensen/JC_EEPROM
-// #include <Streaming.h>      // https://github.com/janelia-arduino/Streaming
-#include <Wire.h> // https://arduino.cc/en/Reference/Wire
-
 constexpr bool erase{false};        // true writes 0xFF to all addresses,
                                     //   false performs write/read test
 constexpr uint32_t totalKBytes{64}; // for read and write test functions
@@ -119,13 +115,15 @@ void setupOTA() {
 
 void setup()
 {
-   /////////// esp_task_wdt_init(30, false);
-
+    /////////// esp_task_wdt_init(30, false);
+    Serial.setTxBufferSize(4096);
     Serial.begin (1000000);
-  
+    
     lcdInit();
 
     Timber::clear();
+    
+    Serial.println("11111111111111111111");
 
     timber.i("--------------------------------");
     timber.i("Контроллер шагового мотора V1.0");
@@ -139,56 +137,6 @@ void setup()
     cliInit();
 
     if (!LittleFS.begin(true)) timber.e("Ошибка при монтировании LittleFS");
-
-   
-    uint8_t eepStatus = 0;//eep.begin(JC_EEPROM::twiClock100kHz); // go fast!
-
-    // 0: success.
-    // 1: data too long to fit in transmit buffer.
-    // 2: received NACK on transmit of address.
-    // 3: received NACK on transmit of data.
-    // 4: other error.
-    // 5: timeout
-
-    switch (eepStatus)
-    {
-    case 0:
-        timber.s("extEEPROM.begin() success");
-        break;
-
-    case 1:
-        timber.e("extEEPROM.begin() failed, 1: data too long to fit in transmit buffer.");
-        break;
-
-    case 2:
-        timber.e("extEEPROM.begin() failed, 2: received NACK on transmit of address.");
-        break;
-
-    case 3:
-        timber.e("extEEPROM.begin() failed, 3: received NACK on transmit of data.");
-        break;
-
-    case 4:
-        timber.e("extEEPROM.begin() failed, 4: other error.");
-        break;
-
-    case 5:
-        timber.e("extEEPROM.begin() failed, 5 :timeout.");
-        break;
-
-    default:
-        timber.e("extEEPROM.begin() failed, default");
-        break;
-    }
-
-    //timber.println("Очистка");
-    //eep.erase(4096);
-    //eepromDump(0, 0x48);
-    // int temp = eep.readInt(0);
-    // timber.println("read Int = 0x%x", temp);
-    // timber.println("read Float = 0x%f", eep.readFloat(2));
-
-    // eep.write(0, 10);
 
     timber.i("------------ init ----------------");
 
@@ -204,8 +152,6 @@ void setup()
     vibroFr.init(10.0f);
     vibroAngle.init(10.0f);
 
-    //eepromDump(0, 256);
-
     timber.i("DEBUG: DB init values - MaxSpeed: %d, Target: %d, VibroFr: %.2f, VibroAngle: %.2f",
              tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
              vibroFr.get(), vibroAngle.get());
@@ -214,8 +160,6 @@ void setup()
     timer = timerBegin(10000); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
     timerAttachInterrupt(timer, &onTimer);
     timerStart(timer);
-
-    //lcdInit();
 
     // eb.setEncISR(true);
 
@@ -253,7 +197,7 @@ void setup()
     // wifi_loop();
 
 
-    setupOTA();
+    //setupOTA();
 
 }
 

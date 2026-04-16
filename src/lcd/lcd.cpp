@@ -53,6 +53,9 @@ void lcdInit()
 
 [[noreturn]] void TaskLcdLoop(void *parameter)
 {
+
+    pinMode(38, OUTPUT);
+    
     tft1.init();
     tft1.setRotation(3);
     tft1.fillScreen(0);
@@ -69,7 +72,7 @@ void lcdInit()
     
     // digitalWrite(38, HIGH);
     
-    pinMode(38, OUTPUT);
+    
 
     ledcAttach(38, 5000, 8); // пин, частота (Гц), разрешение (бит)
     ledcWrite(38, 200);
