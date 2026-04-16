@@ -35,10 +35,6 @@ extern void lcdInit();
 
 extern void encoderInit();
 
-extern void wifi_loop();
-
-extern AsyncWebSocket ws;
-
 // Ble ble;
 
 extern void initTaskDb();
@@ -76,43 +72,6 @@ void IRAM_ATTR onTimer()
     stepper.tick();
 }
 
-
-void setupOTA() {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
-
-    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-        delay(3000);
-        ESP.restart();
-    }
-
-    ArduinoOTA.setHostname("my-esp32s3");
-    ArduinoOTA.setPassword("123456");
-    // ArduinoOTA.setPort(3232);   // можно не задавать, это и так default для ESP32
-
-    ArduinoOTA.onStart([]() {
-        Serial.println("OTA Start");
-    });
-
-    ArduinoOTA.onEnd([]() {
-        Serial.println("\nOTA End");
-    });
-
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("OTA Progress: %u%%\r", (progress * 100) / total);
-    });
-
-    ArduinoOTA.onError([](ota_error_t error) {
-        Serial.printf("OTA Error[%u]\n", error);
-    });
-
-    ArduinoOTA.begin();
-
-    Serial.print("WiFi IP: ");
-    Serial.println(WiFi.localIP());
-}
-
-
 void setup()
 {
     /////////// esp_task_wdt_init(30, false);
@@ -134,7 +93,6 @@ void setup()
 
     encoderInit();
     tmcInit();
-    cliInit();
 
     if (!LittleFS.begin(true)) timber.e("Ошибка при монтировании LittleFS");
 
@@ -223,14 +181,7 @@ void IRAM_ATTR vibro()
 void loop()
 {
 
-    // Обработка команд CLI
-    if (Serial.available())
-    {
-        String input = Serial.readStringUntil('\n');
-        cli.parse(input);
-    }
-
-    // db.tick(); //тикер, вызывать в лупе
+     // db.tick(); //тикер, вызывать в лупе
 
     if (currentMode.get() == WorkMode::CONTINUOUS)
     {
