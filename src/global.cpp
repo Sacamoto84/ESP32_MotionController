@@ -17,9 +17,10 @@ State<float> constRps(1); // Скорость оборотов в секунду
 //=== Vibro ===
 State<float> vibroFr(10.0f, EEPROM_VIBRO_FREC);     // Частот вибрации Hz
 State<float> vibroAngle(30.0f, EEPROM_VIBRO_ANGLE); // Угол поворота 1..359
-bool vibroDir = true;                               // Рантайм переменная направления
-int vibroTarget = 0.0f;                         // Рантайм переменная цели движения равен половине угла
+std::atomic<bool> vibroDir{true};
+std::atomic<int> vibroTarget{0};
 
 GStepper2<STEPPER2WIRE> stepper(200, STEP_PIN, DIR_PIN, EN_PIN);
+portMUX_TYPE stepperMux = portMUX_INITIALIZER_UNLOCKED;
 
 Timber timber;

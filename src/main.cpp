@@ -27,6 +27,9 @@ extern void initTaskDb();
 
 bool shaft = false;
 
+#include <GyverDBFile.h>
+GyverDBFile db(&LittleFS, "data.db");
+
 // esp8266/esp32
 //  IRAM_ATTR void isr() {
 //      eb.tickISR();
@@ -43,15 +46,9 @@ uint8_t dir = 1;
 
 void IRAM_ATTR onTimer()
 {
-    // state = !state; // Переключаем состояние
-
-    //static uint32_t tickCount = 0;
-    //tickCount++;
-    //if (tickCount % 1000 == 0)
-    //{
-        //timber.i("DEBUG: onTimer tick count = %d", tickCount);
-    //}
+    portENTER_CRITICAL_ISR(&stepperMux);
     stepper.tick();
+    portEXIT_CRITICAL_ISR(&stepperMux);
 }
 
 void setup()
@@ -145,23 +142,30 @@ void IRAM_ATTR vibro()
     //timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
     //
 
-    if (stepper.ready())
+    portENTER_CRITICAL(&stepperMux);
+    bool ready = stepper.ready();
+    portEXIT_CRITICAL(&stepperMux);
+
+    if (ready)
     {
-        vibroDir = !vibroDir; // разворачиваем
-        int32_t target = vibroDir * vibroTarget;
-        //timber.i("DEBUG: vibroDir = %d, setting target = %d", vibroDir, target);
-        stepper.setTarget(target); // едем в другую сторону
+        vibroDir = !vibroDir;
+        int32_t target = vibroDir * vibroTarget.load();
+        portENTER_CRITICAL(&stepperMux);
+        stepper.setTarget(target);
+        portEXIT_CRITICAL(&stepperMux);
     }
 }
 
 void loop()
 {
 
-     // db.tick(); //тикер, вызывать в лупе
+    //db.tick(); //тикер, вызывать в лупе
 
     if (currentMode.get() == WorkMode::CONTINUOUS)
     {
-        // stepper.setSpeed(1000);
+        portENTER_CRITICAL(&stepperMux);
+        //stepper.setSpeed(1000);
+        portEXIT_CRITICAL(&stepperMux);
     }
 
     if (currentMode.get() == WorkMode::VIBRO)
@@ -222,20 +226,20 @@ TaskHandle_t TaskDb;
 {
     for (;;)
     {
-        //db.tick();
+        db.tick();
         delay(1000);
     }
 }
 
 void initTaskDb()
 {
-    // xTaskCreatePinnedToCore(
-    //     TaskDbLoop,   /* Функция для задачи */
-    //     "TaskDbLoop", /* Имя задачи */
-    //     20000,        /* Размер стека */
-    //     nullptr,      /* Параметр задачи */
-    //     5,            /* Приоритет */
-    //     &TaskDb,      /* Выполняемая операция */
-    //     0);           /* Номер ядра, на котором она должна выполняться */
+    xTaskCreatePinnedToCore(
+        TaskDbLoop,   /* Функция для задачи */
+        "TaskDbLoop", /* Имя задачи */
+        1000,        /* Размер стека */
+        nullptr,      /* Параметр задачи */
+        5,            /* Приоритет */
+        &TaskDb,      /* Выполняемая операция */
+        0);           /* Номер ядра, на котором она должна выполняться */
 
 }

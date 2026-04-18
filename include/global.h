@@ -2,6 +2,7 @@
 #define _GLOBAL_
 
 #include <Arduino.h>
+#include <atomic>
 
 #include "state.h"
 #include "tmcGlobal.h"
@@ -13,6 +14,7 @@
 #include "addresses.h"
 
 extern GStepper2<STEPPER2WIRE> stepper;
+extern portMUX_TYPE stepperMux;
 
 enum class WorkMode
 {
@@ -40,8 +42,8 @@ extern State<int32_t> tmcStepperTarget; // цель
 
 extern State<float> vibroFr;    // Частот вибрации Hz
 extern State<float> vibroAngle; // Угол поворота 1..359
-extern bool vibroDir;           // Рантайм переменная направления
-extern int vibroTarget;
+extern std::atomic<bool> vibroDir;
+extern std::atomic<int> vibroTarget;
 
 extern State<float> constRps; // Скорость оборотов в секунду
 

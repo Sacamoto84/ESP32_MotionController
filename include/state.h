@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#include <freertos/portmacro.h>
+
 #include "Timber.h"
 
 extern Timber timber;
@@ -21,41 +23,52 @@ class State
 public:
     // Конструктор для инициализации состояния
     explicit State(T initialValue)
-        : value(initialValue), base_addr(-1)
+        : value(initialValue), base_addr(-1), mux(portMUX_INITIALIZER_UNLOCKED)
     {
     }
 
     // Конструктор с EEPROM-адресом
     State(T initialValue, int addr)
-        : value(initialValue), base_addr(addr)
+        : value(initialValue), base_addr(addr), mux(portMUX_INITIALIZER_UNLOCKED)
     {
     }
 
-    // Получение текущего значения
-    T get() const
+    T get()
     {
-        return value;
+        portENTER_CRITICAL(&mux);
+        T v = value;
+        portEXIT_CRITICAL(&mux);
+        return v;
     }
 
-    // Записать в любом случае
     void set(T newValue)
     {
+        portENTER_CRITICAL(&mux);
         value = newValue;
-        notifyObservers();
+        auto obs = observers;
+        portEXIT_CRITICAL(&mux);
+        for (const auto &fn : obs)
+        {
+            fn(newValue);
+        }
     }
 
-    // Добавление наблюдателя
     void addObserver(const std::function<void(T)> &observer)
     {
+        portENTER_CRITICAL(&mux);
         observers.push_back(observer);
+        portEXIT_CRITICAL(&mux);
     }
 
-    // Уведомление всех наблюдателей о новом значении
     void notifyObservers()
     {
-        for (const auto &observer : observers)
+        portENTER_CRITICAL(&mux);
+        T v = value;
+        auto obs = observers;
+        portEXIT_CRITICAL(&mux);
+        for (const auto &fn : obs)
         {
-            observer(value);
+            fn(v);
         }
     }
 
@@ -101,6 +114,7 @@ private:
     int base_addr;
     T value;
     std::vector<std::function<void(T)>> observers;
+    mutable portMUX_TYPE mux;
 };
 
 #endif
