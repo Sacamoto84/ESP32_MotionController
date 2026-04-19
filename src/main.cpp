@@ -12,6 +12,9 @@
 #include "global.h"
 
 #include <EncButton.h>
+
+#include <TimberWidget.h>
+
 constexpr bool erase{false};        // true writes 0xFF to all addresses,
                                     //   false performs write/read test
 constexpr uint32_t totalKBytes{64}; // for read and write test functions
@@ -43,6 +46,9 @@ hw_timer_t *timer = nullptr;
 
 uint8_t dir = 1;
 
+using namespace TimberWidget;
+
+TimberWidgets ui(Serial);
 
 void IRAM_ATTR onTimer()
 {
@@ -55,13 +61,24 @@ void setup()
 {
     /////////// esp_task_wdt_init(30, false);
     Serial.setTxBufferSize(4096);
-    Serial.begin (1000000);
-    
+    Serial.begin(1000000);
+
     lcdInit();
 
     Timber::clear();
-    
+
     Serial.println("11111111111111111111eeйййй2222");
+
+    ui.to(0).badgeStyle("0", BadgeStyle::Ok);
+    ui.to(1).badgeStyle("1", BadgeStyle::Ok);
+    ui.to(2).badgeStyle("2", BadgeStyle::Ok);
+
+    ui.to(3).clearTerminal();
+    ui.to(3).badgeStyle("Ok", BadgeStyle::Ok);
+    ui.to(3).badgeStyle("Error", BadgeStyle::Error);
+    ui.to(3).badgeStyle("Info", BadgeStyle::Info);
+    ui.to(3).at(0).progress(72, "Battery", 100, "#36C36B", "72%");
+    ui.to(3).at(0).progress(56, "Battery", 100, "#36C36B", "36%");
 
     timber.i("--------------------------------");
     timber.i("Контроллер шагового мотора V1.0");
@@ -73,7 +90,8 @@ void setup()
     encoderInit();
     tmcInit();
 
-    if (!LittleFS.begin(true)) timber.e("Ошибка при монтировании LittleFS");
+    if (!LittleFS.begin(true))
+        timber.e("Ошибка при монтировании LittleFS");
 
     timber.i("------------ init ----------------");
 
@@ -129,17 +147,16 @@ void setup()
     // tmcStepperMaxSpeed.set(4000);
     // tmcStepperSetTarget.set(50);
     // stepper.setAcceleration(2000); // ускорение
-
 }
 
 void IRAM_ATTR vibro()
 {
     //
     const float stepI = 1.8f / static_cast<float>(tmcDriverMicrostep.get()); // Угол поворота на один шаг
-    //timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
+    // timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
     const float a = (vibroAngle.get() / stepI);
     vibroTarget = static_cast<int>(a);
-    //timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
+    // timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
     //
 
     portENTER_CRITICAL(&stepperMux);
@@ -156,15 +173,17 @@ void IRAM_ATTR vibro()
     }
 }
 
+int i;
+
 void loop()
 {
 
-    //db.tick(); //тикер, вызывать в лупе
+    // db.tick(); //тикер, вызывать в лупе
 
     if (currentMode.get() == WorkMode::CONTINUOUS)
     {
         portENTER_CRITICAL(&stepperMux);
-        //stepper.setSpeed(1000);
+        // stepper.setSpeed(1000);
         portEXIT_CRITICAL(&stepperMux);
     }
 
@@ -218,16 +237,30 @@ void loop()
     //}
     // shaft = !shaft;
     // driver.shaft(shaft);
+
+    delay(50);
+    
+    i += 1;
+    if (i > 99)
+        i = 0;
+
+    ui.to(3)
+    //.currentSlot()
+    .progress(i, "Battery", 100, "#36C36B", "72%");
 }
 
 TaskHandle_t TaskDb;
 
 [[noreturn]] void TaskDbLoop(void *parameter)
 {
+    uint8_t i = 0;
     for (;;)
     {
         db.tick();
-        delay(1000);
+        delay(500);
+        //..i++;
+        // if (i>99) i=0;
+        // ui.to(3).at(0).progress(i, "Battery", 100, "#36C36B", "72%");
     }
 }
 
@@ -236,10 +269,9 @@ void initTaskDb()
     xTaskCreatePinnedToCore(
         TaskDbLoop,   /* Функция для задачи */
         "TaskDbLoop", /* Имя задачи */
-        1000,        /* Размер стека */
+        1000,         /* Размер стека */
         nullptr,      /* Параметр задачи */
         5,            /* Приоритет */
         &TaskDb,      /* Выполняемая операция */
         0);           /* Номер ядра, на котором она должна выполняться */
-
 }

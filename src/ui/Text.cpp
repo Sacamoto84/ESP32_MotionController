@@ -4,4 +4,5 @@ void Text(const String& text, const int16_t x, const int16_t y, uint16_t colorTe
     spr.setTextColor(colorText, colorBg, bgfill);
     spr.setCursor(x, y);
     spr.println(text);
+    
 }
