@@ -8,6 +8,7 @@ void observerAll(){
     tmcDriverChopObserver();
     tmcDriverCurrentObserver();
     tmcDriverMicrostepObserver();
+    tmcInterpolationObserver();
     vibroAngleObserver();
     vibroFrObserver();
 

@@ -13,6 +13,7 @@ extern void tmcStepperEnableObserver();
 extern void tmcDriverChopObserver();
 extern void tmcDriverCurrentObserver();
 extern void tmcDriverMicrostepObserver();
+extern void tmcInterpolationObserver();
 extern void vibroFrObserver();
 extern void vibroAngleObserver();
 

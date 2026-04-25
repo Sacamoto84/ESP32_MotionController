@@ -29,9 +29,7 @@ void createMenuContinuous()
          //eepromDump(0, 4096); 
     });
     //////////////////////////////////
-    menuContinuous.ITEMS_COUNT = menuContinuous.items.size();
-    menuContinuous.ITEMS_WINDOW = 8;
-    menuContinuous.indexEndWindow = menuContinuous.ITEMS_WINDOW - 1;
+    finalizeMenu(&menuContinuous, 8);
 
     //Вариант 1 — самый универсальный
     // menuContinuous.colorBg =          convert24to16(0x16181C);  // RGB565(0x16, 0x18, 0x1C);

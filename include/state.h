@@ -33,7 +33,7 @@ public:
     {
     }
 
-    T get()
+    T get() const
     {
         portENTER_CRITICAL(&mux);
         T v = value;
@@ -76,22 +76,7 @@ public:
 
     void init(T defaultValue)
     {
-        // uint32_t magic = eep.readInt(base_addr);
-
-        // if (magic != MAGIC)
-        // {
-        //     timber.i("init !Magic создаем поле в EEPROM");
-        //     // Первый запуск — записываем магию и значение
-        //     eep.writeInt(base_addr, MAGIC);
-        //     value = defaultValue;
-        //     this->save();
-        //     notifyObservers();
-        // }
-        // else
-        // {
-        //     this->load(); // Загружаем значение
-        //     notifyObservers();
-        // }
+        set(defaultValue);
     }
 
     // Сохранить текущий value в EEPROM

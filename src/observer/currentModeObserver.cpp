@@ -1,14 +1,23 @@
-//
-// Created by Ivan on 28.03.2025.
-//
 #include "observer.h"
 
-void currentModeObserver(){
-
+void currentModeObserver()
+{
     currentMode.addObserver([](WorkMode value) {
+        timber.i("Observer: currentMode updated");
 
-         timber.i("!!! Observer: currentMode изменен");
-         //db.set(kk::_vibroAngle, value);
-     });
+        if (value == WorkMode::VIBRO)
+        {
+            portENTER_CRITICAL(&stepperMux);
+            stepper.brake();
+            stepper.setCurrent(0);
+            portEXIT_CRITICAL(&stepperMux);
 
+            vibroDir.store(false);
+            vibroAngle.notifyObservers();
+            return;
+        }
+
+        tmcStepperMaxSpeed.notifyObservers();
+        tmcStepperTarget.notifyObservers();
+    });
 }

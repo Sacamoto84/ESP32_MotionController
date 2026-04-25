@@ -35,7 +35,5 @@ void createMenuConfig()
     actions.text = "Текст2";
     menuConfig.addMenuAction(actions);
     ///////////////////////////////////
-    menuConfig.ITEMS_COUNT = menuConfig.items.size();
-    menuConfig.ITEMS_WINDOW = 6;
-    menuConfig.indexEndWindow = menuConfig.ITEMS_WINDOW - 1;
+    finalizeMenu(&menuConfig, 6);
 }

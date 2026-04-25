@@ -1,13 +1,13 @@
-//
-// Created by Ivan on 26.03.2025.
-//
 #include "observer.h"
 
-void vibroAngleObserver(){
-
+void vibroAngleObserver()
+{
     vibroAngle.addObserver([](float value) {
-         timber.i("Observer: vibroAngle изменен %f", value);
-         vibroAngle.save();
-     });
-
+        timber.i("Observer: vibroAngle updated %f", value);
+        if (currentMode.get() == WorkMode::VIBRO)
+        {
+            vibroFr.notifyObservers();
+        }
+        vibroAngle.save();
+    });
 }

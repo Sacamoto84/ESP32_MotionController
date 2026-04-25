@@ -16,6 +16,7 @@ extern screenAction menuVibro;
 
 extern enum CurrenScreen currentScreen;
 
+void finalizeMenu(screenAction* menu, int itemsWindow);
 void createMenuConfig();
 void createMenuContinuous();
 void createMenuVibro();

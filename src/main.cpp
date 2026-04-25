@@ -3,126 +3,91 @@
 #include "FS.h"
 #include "LITTLEFS.h"
 
-#include <TFT_eSPI.h> // Hardware-specific library
-#include <SPI.h>
-#include <TMCStepper.h>
-
-#include <esp_task_wdt.h>
-
-#include "global.h"
-
 #include <EncButton.h>
-
+#include <SPI.h>
+#include <TFT_eSPI.h>
+#include <TMCStepper.h>
 #include <TimberWidget.h>
 
-constexpr bool erase{false};        // true writes 0xFF to all addresses,
-                                    //   false performs write/read test
-constexpr uint32_t totalKBytes{64}; // for read and write test functions
-constexpr uint8_t btnStart{6};      // pin for start button
+#include "global.h"
+#include "storage.h"
 
 extern EncButton eb;
 
 extern void lcdInit();
-
 extern void encoderInit();
 
-extern void initTaskDb();
-
-bool shaft = false;
-
-#include <GyverDBFile.h>
-GyverDBFile db(&LittleFS, "data.db");
-
-// esp8266/esp32
-//  IRAM_ATTR void isr() {
-//      eb.tickISR();
-//  }
-
-#define FREQUENCY 100000 // Частота меандра в Гц (1 кГц)
-
-hw_timer_t *timer = nullptr;
-
-// volatile bool state = false;
-
-uint8_t dir = 1;
+void onTimer();
 
 using namespace TimberWidget;
 
 TimberWidgets ui(Serial);
 
-void IRAM_ATTR onTimer()
+namespace
 {
-    portENTER_CRITICAL_ISR(&stepperMux);
-    stepper.tick();
-    portEXIT_CRITICAL_ISR(&stepperMux);
-}
+constexpr uint32_t kSerialBaudRate = 1000000;
+constexpr uint32_t kSerialTxBufferSize = 4096;
+constexpr uint32_t kStepperTimerFrequencyHz = 50000;
+constexpr uint64_t kStepperTimerAlarmTicks = 1;
+constexpr uint32_t kLoopDelayMs = 1;
+constexpr uint32_t kUiHeartbeatPeriodMs = 50;
+constexpr uint32_t kDbTaskDelayMs = 500;
+constexpr uint8_t kStatusPanelIndex = 3;
+constexpr int kUiHeartbeatMax = 99;
+constexpr float kMotorStepAngleDegrees = 1.8f;
+constexpr char kUiAccentColor[] = "#36C36B";
 
-void setup()
+hw_timer_t *stepperTimer = nullptr;
+TaskHandle_t taskDb = nullptr;
+int uiHeartbeatProgress = 0;
+uint32_t uiHeartbeatTimer = 0;
+
+void initUiDashboard()
 {
-    /////////// esp_task_wdt_init(30, false);
-    Serial.setTxBufferSize(4096);
-    Serial.begin(1000000);
-
-    lcdInit();
-
-    Timber::clear();
-
-    Serial.println("11111111111111111111eeйййй2222");
-
     ui.to(0).badgeStyle("0", BadgeStyle::Ok);
     ui.to(1).badgeStyle("1", BadgeStyle::Ok);
     ui.to(2).badgeStyle("2", BadgeStyle::Ok);
 
-    ui.to(3).clearTerminal();
-    ui.to(3).badgeStyle("Ok", BadgeStyle::Ok);
-    ui.to(3).badgeStyle("Error", BadgeStyle::Error);
-    ui.to(3).badgeStyle("Info", BadgeStyle::Info);
-    ui.to(3).at(0).progress(72, "Battery", 100, "#36C36B", "72%");
-    ui.to(3).at(0).progress(56, "Battery", 100, "#36C36B", "36%");
+    ui.to(kStatusPanelIndex).clearTerminal();
+    ui.to(kStatusPanelIndex).badgeStyle("Ok", BadgeStyle::Ok);
+    ui.to(kStatusPanelIndex).badgeStyle("Error", BadgeStyle::Error);
+    ui.to(kStatusPanelIndex).badgeStyle("Info", BadgeStyle::Info);
+    ui.to(kStatusPanelIndex).at(0).progress(0, "Battery", 100, kUiAccentColor, "72%");
+}
 
+void logStartupBanner()
+{
     timber.i("--------------------------------");
-    timber.i("Контроллер шагового мотора V1.0");
-    timber.w("Ворнинг");
-    timber.e("Ошибка");
-    timber.colorStringln(15, 36, "Проверка 15 36");
+    timber.i("Motion controller V1.0");
     timber.i("--------------------------------");
+}
 
-    encoderInit();
-    tmcInit();
-
-    if (!LittleFS.begin(true))
-        timber.e("Ошибка при монтировании LittleFS");
-
-    timber.i("------------ init ----------------");
-
-    observerAll();
-
+void initializeStates()
+{
     tmcStepperEnable.init(0);
     tmcDriverChop.init(0);
     tmcDriverCurrent.init(1000);
-    tmcDriverMicrostep.init(16); // Микрошаг
+    tmcDriverMicrostep.init(16);
     tmcInterpolation.init(0);
     tmcStepperMaxSpeed.init(2000);
     tmcStepperTarget.init(10);
-    vibroFr.init(10.0f);
     vibroAngle.init(10.0f);
+    vibroFr.init(10.0f);
+}
 
-    timber.i("DEBUG: DB init values - MaxSpeed: %d, Target: %d, VibroFr: %.2f, VibroAngle: %.2f",
-             tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
-             vibroFr.get(), vibroAngle.get());
+void initStepperTimer()
+{
+    stepperTimer = timerBegin(kStepperTimerFrequencyHz);
+    timerAttachInterrupt(stepperTimer, &onTimer);
+    timerAlarm(stepperTimer, kStepperTimerAlarmTicks, true, 0);
+    timerStart(stepperTimer);
+}
 
-    // Создаем таймер
-    timer = timerBegin(10000); // Таймер 0, делитель 80 (80 МГц / 80 = 1 МГц)
-    timerAttachInterrupt(timer, &onTimer);
-    timerStart(timer);
-
-    // eb.setEncISR(true);
-
-    uint32_t drv_status = driver.DRV_STATUS();
+void logDriverDiagnostics()
+{
+    const uint32_t driverStatus = driver.DRV_STATUS();
     Serial.print("DRV_STATUS: 0x");
-    Serial.println(drv_status, HEX);
-
-    // driver.en_pwm_mode(true);       // Toggle stealthChop on TMC2130/2160/5130/5160
+    Serial.println(driverStatus, HEX);
 
     Serial.print("DRV_STATUS=0b");
     Serial.println(driver.DRV_STATUS(), BIN);
@@ -138,140 +103,139 @@ void setup()
 
     Serial.print("toff: ");
     Serial.println(driver.toff());
-
-    initTaskDb();
-
-    // ble.init();
-
-    // stepper.setMaxSpeed(1000000);
-    // tmcStepperMaxSpeed.set(4000);
-    // tmcStepperSetTarget.set(50);
-    // stepper.setAcceleration(2000); // ускорение
 }
 
-void IRAM_ATTR vibro()
+int32_t calculateVibroTravelSteps()
 {
-    //
-    const float stepI = 1.8f / static_cast<float>(tmcDriverMicrostep.get()); // Угол поворота на один шаг
-    // timber.i("DEBUG: stepI = %.6f, vibroAngle = %.2f", stepI, vibroAngle.get());
-    const float a = (vibroAngle.get() / stepI);
-    vibroTarget = static_cast<int>(a);
-    // timber.i("DEBUG: a = %.6f, vibroTarget = %d", a, vibroTarget);
-    //
+    const float microstep = static_cast<float>(tmcDriverMicrostep.get());
+    if (microstep <= 0.0f)
+    {
+        return 0;
+    }
+
+    const float stepAngle = kMotorStepAngleDegrees / microstep;
+    const float travelSteps = vibroAngle.get() / stepAngle;
+    return static_cast<int32_t>(travelSteps + 0.5f);
+}
+
+void handleVibroMode()
+{
+    const int32_t travelSteps = calculateVibroTravelSteps();
+    int32_t endpointSteps = travelSteps / 2;
+    if (travelSteps > 0 && endpointSteps < 1)
+    {
+        endpointSteps = 1;
+    }
+
+    vibroTarget.store(endpointSteps);
 
     portENTER_CRITICAL(&stepperMux);
-    bool ready = stepper.ready();
+    const bool ready = stepper.ready() || stepper.getStatus() == 0;
     portEXIT_CRITICAL(&stepperMux);
 
-    if (ready)
+    if (!ready)
     {
-        vibroDir = !vibroDir;
-        int32_t target = vibroDir * vibroTarget.load();
-        portENTER_CRITICAL(&stepperMux);
-        stepper.setTarget(target);
-        portEXIT_CRITICAL(&stepperMux);
+        return;
     }
+
+    const bool nextDirection = !vibroDir.load();
+    vibroDir.store(nextDirection);
+    const int32_t signedTarget = nextDirection ? endpointSteps : -endpointSteps;
+
+    portENTER_CRITICAL(&stepperMux);
+    stepper.setTarget(signedTarget);
+    portEXIT_CRITICAL(&stepperMux);
 }
 
-int i;
-
-void loop()
+void runCurrentMode()
 {
-
-    // db.tick(); //тикер, вызывать в лупе
-
-    if (currentMode.get() == WorkMode::CONTINUOUS)
-    {
-        portENTER_CRITICAL(&stepperMux);
-        // stepper.setSpeed(1000);
-        portEXIT_CRITICAL(&stepperMux);
-    }
-
     if (currentMode.get() == WorkMode::VIBRO)
     {
-        vibro();
+        handleVibroMode();
     }
-    //    //Режим постоянный
-    //    if (currentMode == WorkMode::CONTINUOUS) {
-    //
-    //        digitalWrite(STEP_PIN, HIGH);
-    //        // // lay(1);
-    //        delayMicroseconds(2000);
-    //        digitalWrite(STEP_PIN, LOW);
-    //        // // delay(1);
-    //        delayMicroseconds(2000);
-    //
-    //    }
-    //
-    //    if (currentMode == WorkMode::VIBRO) {
-    //
-    //
-    //    }
-
-    //  eb.tick();
-    //  // выбор переменной для изменения
-    //   if (eb.hasClicks()) {
-    //       select1 = eb.getClicks();
-    //       timber.i.println(String("Select: ") + select1);
-    //   }
-
-    //   if (eb.turn()) {
-    //       // меняем переменную
-    //       switch (select1) {
-    //           case 1:
-    //               // изменение с шагом 5
-    //               var1 += 5 * eb.dir();
-    //               break;
-    //           case 2:
-    //               // изменение с шагом 1, при зажатой кнопке шаг 5
-    //               var2 += (eb.pressing() ? 5 : 1) * eb.dir();
-    //               break;
-    //           case 3:
-    //               // изменение с шагом 1, при быстром вращении шаг 5
-    //               var3 += (eb.fast() ? 5 : 1) * eb.dir();
-    //               break;
-    //       }
-    //       timber.i.println(String("vars ") + var1 + ',' + var2 + ',' + var3);
-    //   }
-
-    //}
-    // shaft = !shaft;
-    // driver.shaft(shaft);
-
-    delay(50);
-    
-    i += 1;
-    if (i > 99)
-        i = 0;
-
-    ui.to(3)
-    //.currentSlot()
-    .progress(i, "Battery", 100, "#36C36B", "72%");
 }
 
-TaskHandle_t TaskDb;
-
-[[noreturn]] void TaskDbLoop(void *parameter)
+void updateUiHeartbeat()
 {
-    uint8_t i = 0;
+    const uint32_t now = millis();
+    if (now - uiHeartbeatTimer < kUiHeartbeatPeriodMs)
+    {
+        return;
+    }
+    uiHeartbeatTimer = now;
+
+    uiHeartbeatProgress += 1;
+    if (uiHeartbeatProgress > kUiHeartbeatMax)
+    {
+        uiHeartbeatProgress = 0;
+    }
+
+    ui.to(kStatusPanelIndex).progress(uiHeartbeatProgress, "Battery", 100, kUiAccentColor, "72%");
+}
+
+[[noreturn]] void taskDbLoop(void *parameter)
+{
+    (void)parameter;
+
     for (;;)
     {
-        db.tick();
-        delay(500);
-        //..i++;
-        // if (i>99) i=0;
-        // ui.to(3).at(0).progress(i, "Battery", 100, "#36C36B", "72%");
+        tickStorage();
+        delay(kDbTaskDelayMs);
     }
 }
 
 void initTaskDb()
 {
-    xTaskCreatePinnedToCore(
-        TaskDbLoop,   /* Функция для задачи */
-        "TaskDbLoop", /* Имя задачи */
-        1000,         /* Размер стека */
-        nullptr,      /* Параметр задачи */
-        5,            /* Приоритет */
-        &TaskDb,      /* Выполняемая операция */
-        0);           /* Номер ядра, на котором она должна выполняться */
+    xTaskCreatePinnedToCore(taskDbLoop, "TaskDbLoop", 1000, nullptr, 5, &taskDb, 0);
+}
+} // namespace
+
+void IRAM_ATTR onTimer()
+{
+    portENTER_CRITICAL_ISR(&stepperMux);
+    stepper.tick();
+    portEXIT_CRITICAL_ISR(&stepperMux);
+}
+
+void setup()
+{
+    Serial.setTxBufferSize(kSerialTxBufferSize);
+    Serial.begin(kSerialBaudRate);
+
+    lcdInit();
+    Timber::clear();
+    initUiDashboard();
+    logStartupBanner();
+
+    encoderInit();
+    tmcInit();
+
+    if (!LittleFS.begin(true))
+    {
+        timber.e("LittleFS mount failed");
+    }
+    else
+    {
+        initStorage();
+    }
+
+    observerAll();
+    initializeStates();
+    loadVibroScreenSettings();
+    currentMode.notifyObservers();
+
+    timber.i("Init values - MaxSpeed: %d, Target: %d, VibroFr: %.2f, VibroAngle: %.2f",
+             tmcStepperMaxSpeed.get(), tmcStepperTarget.get(),
+             vibroFr.get(), vibroAngle.get());
+
+    initStepperTimer();
+    logDriverDiagnostics();
+    initTaskDb();
+}
+
+void loop()
+{
+    runCurrentMode();
+    delay(kLoopDelayMs);
+    updateUiHeartbeat();
 }
