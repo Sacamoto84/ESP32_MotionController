@@ -6,7 +6,7 @@
 
 namespace
 {
-constexpr char kDbPath[] = "data.db";
+constexpr char kDbPath[] = "/data.db";
 constexpr char kDbKeyVibroFrequency[] = "vibro.frequency";
 constexpr char kDbKeyVibroAngle[] = "vibro.angle";
 constexpr char kDbKeyVibroMicrostep[] = "vibro.microstep";
@@ -17,11 +17,16 @@ bool storageReady = false;
 
 bool initStorage()
 {
-    storageReady = db.begin();
+    const bool dbReady = db.begin();
+    storageReady = dbReady || LittleFS.exists(kDbPath);
 
     if (storageReady)
     {
         timber.i("Storage ready: %s", kDbPath);
+        if (!dbReady)
+        {
+            timber.w("Storage file is empty or unreadable, defaults will be used");
+        }
     }
     else
     {
@@ -71,9 +76,16 @@ bool saveVibroScreenSettings()
         return false;
     }
 
-    db.set(kDbKeyVibroFrequency, vibroFr.get());
-    db.set(kDbKeyVibroAngle, vibroAngle.get());
-    db.set(kDbKeyVibroMicrostep, tmcDriverMicrostep.get());
+    bool changed = false;
+    changed |= db.set(kDbKeyVibroFrequency, vibroFr.get());
+    changed |= db.set(kDbKeyVibroAngle, vibroAngle.get());
+    changed |= db.set(kDbKeyVibroMicrostep, tmcDriverMicrostep.get());
+
+    if (!changed)
+    {
+        timber.i("Vibro settings already saved");
+        return true;
+    }
 
     const bool saved = db.update();
     if (saved)
