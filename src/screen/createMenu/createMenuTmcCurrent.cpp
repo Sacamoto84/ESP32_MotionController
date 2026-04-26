@@ -10,10 +10,10 @@ void createMenuTmcCurrent()
         update();
     });
 
-    addMenuElementEDITINT(&menuTmcCurrent, "IRUN: ", "", &tmcIrun, 0, 31, 1);
+    addMenuElementDynamicText(&menuTmcCurrent, tmcStatusRmsCurrentLine, true);
+    addMenuElementDynamicText(&menuTmcCurrent, tmcStatusCurrentRegsLine, true);
     addMenuElementEDITINT(&menuTmcCurrent, "IHOLD: ", "", &tmcIhold, 0, 31, 1);
     addMenuElementEDITINT(&menuTmcCurrent, "IHOLDDELAY: ", "", &tmcIholdDelay, 0, 15, 1);
-    addMenuElementEDITINT(&menuTmcCurrent, "GLOBAL_SCALER: ", "", &tmcGlobalScaler, 0, 255, 1);
     addMenuElementEDITINT(&menuTmcCurrent, "Freewheel: ", "", &tmcFreewheel, 0, 3, 1);
     addMenuElementDynamicText(&menuTmcCurrent, tmcStatusCsActualLine, true);
 

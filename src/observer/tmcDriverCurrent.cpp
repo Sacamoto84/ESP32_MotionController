@@ -1,11 +1,12 @@
 #include "observer.h"
+#include "tmc2160Config.h"
 
 void tmcDriverCurrentObserver(){
 
     //Установка тока
     tmcDriverCurrent.addObserver([](int32_t value) {
         timber.i("Observer: tmcDriverCurrent updated %d", value);
-        driver.rms_current(value); // Set motor RMS current
+        applyTmc2160CurrentConfig();
         tmcDriverCurrent.save();
     });
 

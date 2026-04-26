@@ -23,6 +23,19 @@ uint8_t u8(int32_t value, uint8_t minValue, uint8_t maxValue)
     return static_cast<uint8_t>(value);
 }
 
+uint16_t rmsCurrentMa(int32_t value)
+{
+    if (value < 100)
+    {
+        return 100;
+    }
+    if (value > 3100)
+    {
+        return 3100;
+    }
+    return static_cast<uint16_t>(value);
+}
+
 uint16_t u16(int32_t value, uint16_t minValue, uint16_t maxValue)
 {
     if (value < minValue)
@@ -121,10 +134,9 @@ void applyTmc2160BasicConfig()
 
 void applyTmc2160CurrentConfig()
 {
-    driver.irun(u8(tmcIrun.get(), 0, 31));
-    driver.ihold(u8(tmcIhold.get(), 0, 31));
+    driver.rms_current(rmsCurrentMa(tmcDriverCurrent.get()));
+    driver.ihold(u8(tmcIhold.get(), 0, driver.irun()));
     driver.iholddelay(u8(tmcIholdDelay.get(), 0, 15));
-    driver.GLOBAL_SCALER(u8(tmcGlobalScaler.get(), 0, 255));
     driver.freewheel(u8(tmcFreewheel.get(), 0, 3));
 }
 
@@ -289,4 +301,15 @@ String tmcStatusSgLine()
     const Tmc2160Status status = readTmc2160Status();
     return "SG: " + String(status.sgResult) + " stall " + String(status.stallGuard) + " stst " +
            String(status.standstill);
+}
+
+String tmcStatusRmsCurrentLine()
+{
+    return "RMS actual: " + String(driver.rms_current()) + " mA";
+}
+
+String tmcStatusCurrentRegsLine()
+{
+    return "IRUN/IHOLD/GS: " + String(driver.irun()) + "/" + String(driver.ihold()) + "/" +
+           String(driver.GLOBAL_SCALER());
 }

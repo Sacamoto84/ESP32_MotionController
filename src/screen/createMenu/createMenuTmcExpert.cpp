@@ -19,8 +19,8 @@ void createMenuTmcExpert()
     addMenuElementSwitch(&menuTmcExpert, "DIAG1 index: Вкл", "DIAG1 index: Выкл", &tmcDiag1Index);
     addMenuElementSwitch(&menuTmcExpert, "DIAG1 onstate: Вкл", "DIAG1 onstate: Выкл", &tmcDiag1Onstate);
     addMenuElementSwitch(&menuTmcExpert, "DIAG1 skipped: Вкл", "DIAG1 skipped: Выкл", &tmcDiag1StepsSkipped);
-    addMenuElementSwitch(&menuTmcExpert, "DIAG0 pushpull: Вкл", "DIAG0 pushpull: Выкл", &tmcDiag0PushPull);
-    addMenuElementSwitch(&menuTmcExpert, "DIAG1 pushpull: Вкл", "DIAG1 pushpull: Выкл", &tmcDiag1PushPull);
+    addMenuElementSwitch(&menuTmcExpert, "DIAG0: уровень", "DIAG0: откр.сток", &tmcDiag0PushPull);
+    addMenuElementSwitch(&menuTmcExpert, "DIAG1: уровень", "DIAG1: откр.сток", &tmcDiag1PushPull);
     addMenuElementEDITINT(&menuTmcExpert, "S2VS level: ", "", &tmcS2vsLevel, 0, 15, 1);
     addMenuElementEDITINT(&menuTmcExpert, "S2G level: ", "", &tmcS2gLevel, 0, 15, 1);
     addMenuElementEDITINT(&menuTmcExpert, "Short filter: ", "", &tmcShortFilter, 0, 3, 1);

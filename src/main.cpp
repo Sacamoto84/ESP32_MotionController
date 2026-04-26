@@ -117,8 +117,8 @@ void initializeStates()
     tmcDiag1Index.init(0);
     tmcDiag1Onstate.init(0);
     tmcDiag1StepsSkipped.init(0);
-    tmcDiag0PushPull.init(0);
-    tmcDiag1PushPull.init(0);
+    tmcDiag0PushPull.init(1);
+    tmcDiag1PushPull.init(1);
     tmcS2vsLevel.init(6);
     tmcS2gLevel.init(6);
     tmcShortFilter.init(1);

@@ -242,6 +242,9 @@ void loadTmc2160Settings()
     loadInt(kDbKeyTmcDiag1StepsSkipped, tmcDiag1StepsSkipped);
     loadInt(kDbKeyTmcDiag0PushPull, tmcDiag0PushPull);
     loadInt(kDbKeyTmcDiag1PushPull, tmcDiag1PushPull);
+    // Hardware uses 5V DIAG through a resistor divider to ESP32, so DIAG must actively drive logic levels.
+    tmcDiag0PushPull.set(1);
+    tmcDiag1PushPull.set(1);
     loadInt(kDbKeyTmcS2vsLevel, tmcS2vsLevel);
     loadInt(kDbKeyTmcS2gLevel, tmcS2gLevel);
     loadInt(kDbKeyTmcShortFilter, tmcShortFilter);

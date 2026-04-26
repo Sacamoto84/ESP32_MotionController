@@ -50,5 +50,7 @@ String tmcStatusPwmLine();
 String tmcStatusLostStepsLine();
 String tmcStatusCsActualLine();
 String tmcStatusSgLine();
+String tmcStatusRmsCurrentLine();
+String tmcStatusCurrentRegsLine();
 
 #endif
