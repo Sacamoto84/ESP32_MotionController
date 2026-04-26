@@ -16,7 +16,6 @@ void createMenuTmcDiag()
     addMenuElementDynamicText(&menuTmcDiag, tmcStatusSgLine, true);
     addMenuElementDynamicText(&menuTmcDiag, tmcStatusCsActualLine, true);
     addMenuElementDynamicText(&menuTmcDiag, tmcStatusPwmLine, true);
-    addMenuElementDynamicText(&menuTmcDiag, tmcStatusLostStepsLine, true);
 
     addMenuElementButton(&menuTmcDiag, "Очистить GSTAT", [](int) {
         clearTmc2160Status();

@@ -29,11 +29,6 @@ void observeStallCool(State<int32_t>& state)
     state.addObserver([](int32_t) { applyTmc2160StallCoolConfig(); });
 }
 
-void observeDcStep(State<int32_t>& state)
-{
-    state.addObserver([](int32_t) { applyTmc2160DcStepConfig(); });
-}
-
 void observeExpert(State<int32_t>& state)
 {
     state.addObserver([](int32_t) { applyTmc2160ExpertConfig(); });
@@ -81,10 +76,6 @@ void tmc2160SettingsObserver()
     observeStallCool(tmcSeup);
     observeStallCool(tmcSedn);
     observeStallCool(tmcSeimin);
-
-    observeDcStep(tmcVdcMin);
-    observeDcStep(tmcDcTime);
-    observeDcStep(tmcDcSg);
 
     observeExpert(tmcDiag0Error);
     observeExpert(tmcDiag0Otw);

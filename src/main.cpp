@@ -10,6 +10,7 @@
 #include <TimberWidget.h>
 
 #include "global.h"
+#include "ina226Monitor.h"
 #include "motionConfig.h"
 #include "storage.h"
 
@@ -298,6 +299,7 @@ void setup()
 
     encoderInit();
     tmcInit();
+    initIna226Monitor();
 
     if (!LittleFS.begin(true))
     {
@@ -327,6 +329,7 @@ void setup()
 void loop()
 {
     runCurrentMode();
+    tickIna226Monitor();
     delay(kLoopDelayMs);
     updateUiHeartbeat();
 }

@@ -5,6 +5,7 @@
 
 #include "TFT_color.h"
 #include "global.h"
+#include "ina226Monitor.h"
 #include "screen/createMenu.h"
 #include "screen/menuTypedef.h"
 
@@ -36,6 +37,10 @@ constexpr int kBacklightPwmFreq = 5000;
 constexpr int kBacklightPwmResolution = 8;
 constexpr int kBacklightDuty = 200;
 constexpr int kRenderDelayMs = 1;
+constexpr int kPowerOverlayRight = 314;
+constexpr int kPowerOverlayTop = 4;
+constexpr int kPowerOverlayWidth = 132;
+constexpr int kPowerOverlayHeight = 22;
 
 int clampIndex(int value, int minValue, int maxValue)
 {
@@ -184,8 +189,6 @@ screenAction *activeScreen()
         return &menuTmcStall;
     case TMC_DIAG:
         return &menuTmcDiag;
-    case TMC_DCSTEP:
-        return &menuTmcDcStep;
     case TMC_EXPERT:
         return &menuTmcExpert;
     case MAIN:
@@ -209,6 +212,17 @@ void drawScrollbar(const screenAction *screen)
     spr.fillRect(kScrollBarX, kScrollBarY, kScrollBarWidth, kDisplayHeight, Black);
     spr.fillRect(kScrollBarX + 1, kScrollBarY + scrollOffset, kScrollBarWidth - 2,
                  static_cast<int32_t>(activeHeight), White);
+}
+
+void drawPowerOverlay(uint16_t colorBg)
+{
+    const String text = ina226OverlayText();
+    spr.fillRect(kPowerOverlayRight - kPowerOverlayWidth, kPowerOverlayTop - 1,
+                 kPowerOverlayWidth, kPowerOverlayHeight, colorBg);
+    spr.setTextDatum(TR_DATUM);
+    spr.setTextColor(White, colorBg);
+    spr.drawString(text, kPowerOverlayRight, kPowerOverlayTop);
+    spr.setTextDatum(TL_DATUM);
 }
 } // namespace
 
@@ -236,7 +250,6 @@ void lcdInit()
     createMenuTmcStealth();
     createMenuTmcStall();
     createMenuTmcDiag();
-    createMenuTmcDcStep();
     createMenuTmcExpert();
 
     while (true)
@@ -297,6 +310,7 @@ void Screen(screenAction *screen)
         }
 
         drawScrollbar(screen);
+        drawPowerOverlay(colorBg);
         spr.pushSprite(0, 0);
     }
 }

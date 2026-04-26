@@ -23,7 +23,6 @@ void createMenuConfig()
     addMenuElementButton(&menuConfig, "StealthChop >", [](int) { openScreen(TMC_STEALTH); });
     addMenuElementButton(&menuConfig, "Stall/Cool >", [](int) { openScreen(TMC_STALL); });
     addMenuElementButton(&menuConfig, "Диагностика >", [](int) { openScreen(TMC_DIAG); });
-    addMenuElementButton(&menuConfig, "dcStep >", [](int) { openScreen(TMC_DCSTEP); });
     addMenuElementButton(&menuConfig, "Эксперт >", [](int) { openScreen(TMC_EXPERT); });
 
     addMenuElementButton(&menuConfig, "Сохранить TMC", [](int) {

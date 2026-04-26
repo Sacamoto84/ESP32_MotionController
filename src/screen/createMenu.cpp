@@ -9,7 +9,6 @@ screenAction menuTmcChopper;
 screenAction menuTmcStealth;
 screenAction menuTmcStall;
 screenAction menuTmcDiag;
-screenAction menuTmcDcStep;
 screenAction menuTmcExpert;
 enum CurrenScreen configReturnScreen = MAIN;
 

@@ -14,7 +14,6 @@ enum CurrenScreen {
     TMC_STEALTH,
     TMC_STALL,
     TMC_DIAG,
-    TMC_DCSTEP,
     TMC_EXPERT,
 };
 
@@ -27,7 +26,6 @@ extern screenAction menuTmcChopper;
 extern screenAction menuTmcStealth;
 extern screenAction menuTmcStall;
 extern screenAction menuTmcDiag;
-extern screenAction menuTmcDcStep;
 extern screenAction menuTmcExpert;
 
 extern enum CurrenScreen currentScreen;
@@ -45,7 +43,6 @@ void createMenuTmcChopper();
 void createMenuTmcStealth();
 void createMenuTmcStall();
 void createMenuTmcDiag();
-void createMenuTmcDcStep();
 void createMenuTmcExpert();
 
 void addMenuElementText(screenAction* menu, const char* text, bool skipping = false);

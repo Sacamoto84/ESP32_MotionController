@@ -204,7 +204,6 @@ void applyTmc2160Config()
     applyTmc2160ChopperConfig();
     applyTmc2160StealthConfig();
     applyTmc2160StallCoolConfig();
-    applyTmc2160DcStepConfig();
     applyTmc2160ExpertConfig();
 }
 
