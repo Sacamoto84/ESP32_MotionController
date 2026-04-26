@@ -9,6 +9,15 @@ void addMenuElementText(screenAction* menu, const char* text, bool skipping)
     menu->addMenuAction(actions);
 }
 
+void addMenuElementDynamicText(screenAction* menu, TextCallbackType textCallback, bool skipping)
+{
+    itemAction actions;
+    actions.type = itemAction::TEXT;
+    actions.textCallback = textCallback;
+    actions.skipping = skipping;
+    menu->addMenuAction(actions);
+}
+
 void addMenuElementSwitch(screenAction* menu, const char* textOn, const char* textOff, State<int32_t>* value)
 {
     itemAction actions;
@@ -55,4 +64,17 @@ void addMenuElementButton(screenAction* menu, const char* text, CallbackType cal
     actions.callback = callback;
     menu->addMenuAction(actions);
     actions.callback = nullptr;
+}
+
+void addMenuElementMicrostep(screenAction* menu, State<int32_t>* value)
+{
+    itemAction actions;
+    actions.type = itemAction::EDITINTMICROSTEP;
+    actions.value = value;
+    actions.text = "Микрошаг: 1/";
+    actions.testSuffix = "";
+    actions.min = 1;
+    actions.max = 256;
+    actions.step = 1;
+    menu->addMenuAction(actions);
 }

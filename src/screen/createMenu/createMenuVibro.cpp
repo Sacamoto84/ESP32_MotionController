@@ -35,8 +35,7 @@ void createMenuVibro()
 
     addMenuElementButton(&menuVibro, "Настройка", [](int) {
         timber.i("Нажата кнопка: Настройка");
-        currentScreen = CONFIG;
-        update();
+        openConfigScreen();
     });
 
     finalizeMenu(&menuVibro, 7);

@@ -1,5 +1,7 @@
 #include "../createMenu.h"
 
+#include "storage.h"
+
 //Создание списка отображения
 void createMenuContinuous()
 {
@@ -10,17 +12,19 @@ void createMenuContinuous()
        currentScreen = VIBRO;
        currentMode.set(WorkMode::VIBRO);
        update();
-   });
+    });
 
     addMenuElementSwitch(&menuContinuous, "Мотор: Вкл", "Мотор: Выкл", &tmcStepperEnable);
-    addMenuElementText(&menuContinuous, "Направление: ->");
-    addMenuElementEDITINT(&menuContinuous, "Скорость: ", "", &tmcStepperMaxSpeed,0, 100000, 250);
-    addMenuElementEDITINT(&menuContinuous, "Амплитуда: ", "", &tmcStepperTarget,0, 1000000, 100);
+    addMenuElementSwitch(&menuContinuous, "Направление: ->", "Направление: <-", &constDirection);
+    addMenuElementEditFloat(&menuContinuous, "Скорость об/с: ", "", &constRps, 0.0f, 200.0f, 0.1f);
+    addMenuElementButton(&menuContinuous, "Сохранить", [](int) {
+        saveContinuousScreenSettings();
+        update();
+    });
     ///////////////////////////////////
     addMenuElementButton(&menuContinuous, "Настройка",[](int){
         timber.i("Нажата кнопка: Настройка");
-        currentScreen = CONFIG;
-        update();
+        openConfigScreen();
     });
     //////////////////////////////////
     addMenuElementButton(&menuContinuous, "Перезагрузка",[](int){ esp_restart(); });

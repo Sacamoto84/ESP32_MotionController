@@ -1,39 +1,36 @@
 #include "../createMenu.h"
 
-//Создание списка настройки
+#include "storage.h"
+
+namespace
+{
+void openScreen(CurrenScreen screen)
+{
+    currentScreen = screen;
+    update();
+}
+}
+
 void createMenuConfig()
 {
-    itemAction actions;
+    addMenuElementButton(&menuConfig, "<- Назад", [](int) {
+        closeConfigScreen();
+    });
 
-    addMenuElementButton(&menuConfig, "<- Назад",[](int){
-        timber.i("<- Назад"); currentScreen = MAIN; update(); });
-    addMenuElementSwitch(&menuConfig, "Мотор: Вкл", "Мотор: Выкл", &tmcStepperEnable);
-    addMenuElementSwitch(&menuConfig, "Режим: StealthChop", "Режим: SpreadCycle", &tmcDriverChop);
-    addMenuElementEDITINT(&menuConfig, "Ток: ", " мА", &tmcDriverCurrent,100, 3100, 100);
-    ///////////////////////////////////
-    actions.type = itemAction::EDITINTMICROSTEP;
-    actions.value = &tmcDriverMicrostep;
-    actions.text = "Микрошаг: 1/";
-    actions.testSuffix = (char*)"";
-    actions.min = 1;
-    actions.max = 256;
-    actions.step = 1;
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    addMenuElementSwitch(&menuConfig, "Interpolation: Вкл", "Interpolation: Выкл", &tmcInterpolation);
-    ///////////////////////////////////
-    actions.type = itemAction::TEXT;
-    actions.text = "Текст0";
-    actions.skipping = true;
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::TEXT;
-    actions.text = "Текст1";
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    actions.type = itemAction::TEXT;
-    actions.text = "Текст2";
-    menuConfig.addMenuAction(actions);
-    ///////////////////////////////////
-    finalizeMenu(&menuConfig, 6);
+    addMenuElementButton(&menuConfig, "Основные >", [](int) { openScreen(TMC_BASIC); });
+    addMenuElementButton(&menuConfig, "Ток/покой >", [](int) { openScreen(TMC_CURRENT); });
+    addMenuElementButton(&menuConfig, "Chopper >", [](int) { openScreen(TMC_CHOPPER); });
+    addMenuElementButton(&menuConfig, "StealthChop >", [](int) { openScreen(TMC_STEALTH); });
+    addMenuElementButton(&menuConfig, "Stall/Cool >", [](int) { openScreen(TMC_STALL); });
+    addMenuElementButton(&menuConfig, "Диагностика >", [](int) { openScreen(TMC_DIAG); });
+    addMenuElementButton(&menuConfig, "dcStep >", [](int) { openScreen(TMC_DCSTEP); });
+    addMenuElementButton(&menuConfig, "Эксперт >", [](int) { openScreen(TMC_EXPERT); });
+
+    addMenuElementButton(&menuConfig, "Сохранить TMC", [](int) {
+        saveTmc2160Settings();
+        update();
+    });
+    addMenuElementButton(&menuConfig, "Перезагрузка", [](int) { esp_restart(); });
+
+    finalizeMenu(&menuConfig, 7);
 }

@@ -72,5 +72,9 @@ void tmcDriverMicrostepObserver()
             vibroAngle.notifyObservers();
             vibroFr.notifyObservers();
         }
+        else if (currentMode.get() == WorkMode::CONTINUOUS)
+        {
+            constRps.notifyObservers();
+        }
     });
 }

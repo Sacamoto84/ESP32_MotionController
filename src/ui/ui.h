@@ -17,6 +17,7 @@
 
 // Определяем тип коллбека
 typedef void (*CallbackType)(int);
+typedef String (*TextCallbackType)();
 
 struct itemAction
 {
@@ -38,6 +39,7 @@ struct itemAction
     String testSuffix;
 
     String text;
+    TextCallbackType textCallback = nullptr;
     //String correction;
 
     int32_t min = 0;

@@ -172,6 +172,22 @@ screenAction *activeScreen()
         return &menuConfig;
     case VIBRO:
         return &menuVibro;
+    case TMC_BASIC:
+        return &menuTmcBasic;
+    case TMC_CURRENT:
+        return &menuTmcCurrent;
+    case TMC_CHOPPER:
+        return &menuTmcChopper;
+    case TMC_STEALTH:
+        return &menuTmcStealth;
+    case TMC_STALL:
+        return &menuTmcStall;
+    case TMC_DIAG:
+        return &menuTmcDiag;
+    case TMC_DCSTEP:
+        return &menuTmcDcStep;
+    case TMC_EXPERT:
+        return &menuTmcExpert;
     case MAIN:
     default:
         return &menuContinuous;
@@ -214,6 +230,14 @@ void lcdInit()
     createMenuContinuous();
     createMenuConfig();
     createMenuVibro();
+    createMenuTmcBasic();
+    createMenuTmcCurrent();
+    createMenuTmcChopper();
+    createMenuTmcStealth();
+    createMenuTmcStall();
+    createMenuTmcDiag();
+    createMenuTmcDcStep();
+    createMenuTmcExpert();
 
     while (true)
     {

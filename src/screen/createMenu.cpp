@@ -3,6 +3,40 @@
 screenAction menuConfig;
 screenAction menuContinuous;
 screenAction menuVibro;
+screenAction menuTmcBasic;
+screenAction menuTmcCurrent;
+screenAction menuTmcChopper;
+screenAction menuTmcStealth;
+screenAction menuTmcStall;
+screenAction menuTmcDiag;
+screenAction menuTmcDcStep;
+screenAction menuTmcExpert;
+enum CurrenScreen configReturnScreen = MAIN;
+
+namespace
+{
+bool isMainModeScreen(CurrenScreen screen)
+{
+    return screen == MAIN || screen == VIBRO;
+}
+}
+
+void openConfigScreen()
+{
+    if (isMainModeScreen(currentScreen))
+    {
+        configReturnScreen = currentScreen;
+    }
+
+    currentScreen = CONFIG;
+    update();
+}
+
+void closeConfigScreen()
+{
+    currentScreen = isMainModeScreen(configReturnScreen) ? configReturnScreen : MAIN;
+    update();
+}
 
 void finalizeMenu(screenAction* menu, int itemsWindow)
 {

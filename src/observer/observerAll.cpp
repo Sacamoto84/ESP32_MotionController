@@ -9,10 +9,12 @@ void observerAll(){
     tmcDriverCurrentObserver();
     tmcDriverMicrostepObserver();
     tmcInterpolationObserver();
+    tmc2160SettingsObserver();
     vibroAngleObserver();
     vibroFrObserver();
 
     currentModeObserver();
+    constDirectionObserver();
     constRpsObserver();
     
 }

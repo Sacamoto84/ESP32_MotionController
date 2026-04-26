@@ -17,7 +17,10 @@ void currentModeObserver()
             return;
         }
 
-        tmcStepperMaxSpeed.notifyObservers();
-        tmcStepperTarget.notifyObservers();
+        portENTER_CRITICAL(&stepperMux);
+        stepper.brake();
+        portEXIT_CRITICAL(&stepperMux);
+
+        constRps.notifyObservers();
     });
 }

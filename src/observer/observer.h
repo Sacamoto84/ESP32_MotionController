@@ -14,10 +14,12 @@ extern void tmcDriverChopObserver();
 extern void tmcDriverCurrentObserver();
 extern void tmcDriverMicrostepObserver();
 extern void tmcInterpolationObserver();
+extern void tmc2160SettingsObserver();
 extern void vibroFrObserver();
 extern void vibroAngleObserver();
 
 extern void currentModeObserver();
+extern void constDirectionObserver();
 extern void constRpsObserver();
 
 #endif //OBSERVER_H

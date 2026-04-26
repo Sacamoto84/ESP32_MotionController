@@ -10,6 +10,7 @@
 #include <TimberWidget.h>
 
 #include "global.h"
+#include "motionConfig.h"
 #include "storage.h"
 
 extern EncButton eb;
@@ -27,14 +28,11 @@ namespace
 {
 constexpr uint32_t kSerialBaudRate = 1000000;
 constexpr uint32_t kSerialTxBufferSize = 4096;
-constexpr uint32_t kStepperTimerFrequencyHz = 50000;
-constexpr uint64_t kStepperTimerAlarmTicks = 1;
 constexpr uint32_t kLoopDelayMs = 1;
 constexpr uint32_t kUiHeartbeatPeriodMs = 50;
 constexpr uint32_t kDbTaskDelayMs = 500;
 constexpr uint8_t kStatusPanelIndex = 3;
 constexpr int kUiHeartbeatMax = 99;
-constexpr float kMotorStepAngleDegrees = 1.8f;
 constexpr char kUiAccentColor[] = "#36C36B";
 
 hw_timer_t *stepperTimer = nullptr;
@@ -71,6 +69,64 @@ void initializeStates()
     tmcInterpolation.init(0);
     tmcStepperMaxSpeed.init(2000);
     tmcStepperTarget.init(10);
+    constDirection.init(1);
+    constRps.init(1.0f);
+    tmcFastStandstill.init(0);
+    tmcTPwmThrs.init(0);
+    tmcTPowerDown.init(10);
+    tmcIrun.init(31);
+    tmcIhold.init(16);
+    tmcIholdDelay.init(6);
+    tmcGlobalScaler.init(0);
+    tmcFreewheel.init(0);
+    tmcToff.init(8);
+    tmcTbl.init(1);
+    tmcHstrt.init(5);
+    tmcHend.init(2);
+    tmcChm.init(0);
+    tmcDedge.init(0);
+    tmcVhighfs.init(0);
+    tmcVhighchm.init(0);
+    tmcPwmAutoscale.init(1);
+    tmcPwmAutograd.init(1);
+    tmcPwmOfs.init(30);
+    tmcPwmGrad.init(0);
+    tmcPwmFreq.init(0);
+    tmcPwmReg.init(4);
+    tmcPwmLim.init(12);
+    tmcSgt.init(0);
+    tmcSfilt.init(0);
+    tmcTCoolThrs.init(0);
+    tmcTHigh.init(0);
+    tmcSemin.init(0);
+    tmcSemax.init(0);
+    tmcSeup.init(0);
+    tmcSedn.init(0);
+    tmcSeimin.init(0);
+    tmcVdcMin.init(0);
+    tmcDcTime.init(0);
+    tmcDcSg.init(0);
+    tmcRecalibrate.init(0);
+    tmcMultistepFilt.init(0);
+    tmcStopEnable.init(0);
+    tmcDiag0Error.init(0);
+    tmcDiag0Otw.init(0);
+    tmcDiag0Stall.init(0);
+    tmcDiag1Stall.init(0);
+    tmcDiag1Index.init(0);
+    tmcDiag1Onstate.init(0);
+    tmcDiag1StepsSkipped.init(0);
+    tmcDiag0PushPull.init(0);
+    tmcDiag1PushPull.init(0);
+    tmcS2vsLevel.init(6);
+    tmcS2gLevel.init(6);
+    tmcShortFilter.init(1);
+    tmcShortDelay.init(0);
+    tmcBbmTime.init(0);
+    tmcBbmClks.init(4);
+    tmcOtSelect.init(0);
+    tmcDrvStrength.init(2);
+    tmcFiltIsense.init(0);
     vibroAngle.init(10.0f);
     vibroFr.init(10.0f);
 }
@@ -79,8 +135,30 @@ void initStepperTimer()
 {
     stepperTimer = timerBegin(kStepperTimerFrequencyHz);
     timerAttachInterrupt(stepperTimer, &onTimer);
-    timerAlarm(stepperTimer, kStepperTimerAlarmTicks, true, 0);
+    timerWrite(stepperTimer, 0);
+    timerAlarm(stepperTimer, kStepperIdlePeriodUs, false, 0);
     timerStart(stepperTimer);
+}
+
+uint32_t IRAM_ATTR clampStepperTimerPeriod(uint32_t periodUs)
+{
+    if (periodUs < kStepperMinPeriodUs)
+    {
+        return kStepperMinPeriodUs;
+    }
+
+    return periodUs;
+}
+
+void IRAM_ATTR scheduleStepperTimer(uint32_t periodUs)
+{
+    if (stepperTimer == nullptr)
+    {
+        return;
+    }
+
+    timerWrite(stepperTimer, 0);
+    timerAlarm(stepperTimer, clampStepperTimerPeriod(periodUs), false, 0);
 }
 
 void logDriverDiagnostics()
@@ -192,9 +270,20 @@ void initTaskDb()
 
 void IRAM_ATTR onTimer()
 {
+    uint32_t nextPeriodUs = kStepperIdlePeriodUs;
+
     portENTER_CRITICAL_ISR(&stepperMux);
-    stepper.tick();
+    if (stepper.getStatus() != 0)
+    {
+        stepper.tickManual();
+        if (stepper.getStatus() != 0)
+        {
+            nextPeriodUs = stepper.getPeriod();
+        }
+    }
     portEXIT_CRITICAL_ISR(&stepperMux);
+
+    scheduleStepperTimer(nextPeriodUs);
 }
 
 void setup()
@@ -221,6 +310,8 @@ void setup()
 
     observerAll();
     initializeStates();
+    loadContinuousScreenSettings();
+    loadTmc2160Settings();
     loadVibroScreenSettings();
     currentMode.notifyObservers();
 
